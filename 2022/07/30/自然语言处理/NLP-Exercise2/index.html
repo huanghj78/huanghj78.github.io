@@ -1,0 +1,153 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>NLP-Exercise2  Word2Vec</title><meta name="author" content="HogarHuang"><meta name="copyright" content="HogarHuang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="题目要求 Apply Word2Vec on tokenized sentences from Exercise 1 Word2Vec: https:&#x2F;&#x2F;radimrehurek.com&#x2F;gensim&#x2F;models&#x2F;word2vec.html  实现代码1234567891011121314151617181920212223242526272829303132333435363738394041">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NLP-Exercise2  Word2Vec">
+<meta property="og:url" content="http://example.com/2022/07/30/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/NLP-Exercise2/index.html">
+<meta property="og:site_name" content="Hogar&#39;s Blog">
+<meta property="og:description" content="题目要求 Apply Word2Vec on tokenized sentences from Exercise 1 Word2Vec: https:&#x2F;&#x2F;radimrehurek.com&#x2F;gensim&#x2F;models&#x2F;word2vec.html  实现代码1234567891011121314151617181920212223242526272829303132333435363738394041">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/background.jpg">
+<meta property="article:published_time" content="2022-07-30T08:41:13.791Z">
+<meta property="article:modified_time" content="2022-07-30T08:50:58.992Z">
+<meta property="article:author" content="HogarHuang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/background.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/07/30/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/NLP-Exercise2/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: HogarHuang","link":"Link: ","source":"Source: Hogar's Blog","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'NLP-Exercise2  Word2Vec',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-07-30 16:50:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/shuoba"><i class="fa-fw fas fa-comment-dots"></i><span> 说吧</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hogar's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/shuoba"><i class="fa-fw fas fa-comment-dots"></i><span> 说吧</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">NLP-Exercise2  Word2Vec</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">Created</span><time datetime="2022-07-30T08:41:13.791Z" title="Created 2022-07-30 16:41:13">2022-07-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">自然语言处理</a></span></div><div class="meta-secondline"></div></div></div><article class="post-content" id="article-container"><h1 id="题目要求"><a href="#题目要求" class="headerlink" title="题目要求"></a>题目要求</h1><ul>
+<li>Apply Word2Vec on tokenized sentences from Exercise 1</li>
+<li>Word2Vec: <a target="_blank" rel="noopener" href="https://radimrehurek.com/gensim/models/word2vec.html">https://radimrehurek.com/gensim/models/word2vec.html</a></li>
+</ul>
+<h2 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> lxml</span><br><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">import</span> pandas</span><br><span class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</span><br><span class="line"><span class="keyword">from</span> xlwt <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> gensim.models.word2vec <span class="keyword">import</span> Word2Vec</span><br><span class="line"><span class="keyword">from</span> gensim.models <span class="keyword">import</span> KeyedVectors</span><br><span class="line"></span><br><span class="line">URL = <span class="string">&quot;https://news.ifeng.com/c/8EOcnBCpJir&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从指定url获取文本</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_content</span>(<span class="params">url</span>):</span><br><span class="line">    f = requests.get(url)</span><br><span class="line">    <span class="comment"># 创建一个 BeautifulSoup 对象，并将解析器指定为 lxml</span></span><br><span class="line">    soup = BeautifulSoup(f.content, <span class="string">&#x27;lxml&#x27;</span>)</span><br><span class="line">    <span class="comment"># 找到所有正文</span></span><br><span class="line">    contents = soup.find(<span class="string">&#x27;div&#x27;</span>, &#123;<span class="string">&#x27;class&#x27;</span>: <span class="string">&#x27;text-3w2e3DBc&#x27;</span>&#125;).find_all(<span class="string">&#x27;p&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> contents</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分词</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">cut_content</span>(<span class="params">contents</span>):</span><br><span class="line">    <span class="comment"># 将被剔除的符号集</span></span><br><span class="line">    signSet = <span class="built_in">set</span>([<span class="string">&#x27;,&#x27;</span>, <span class="string">&#x27;。&#x27;</span>, <span class="string">&#x27;:&#x27;</span>, <span class="string">&#x27;“&#x27;</span>, <span class="string">&#x27;”&#x27;</span>, <span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;，&#x27;</span>,</span><br><span class="line">                  <span class="string">&#x27;-&#x27;</span>, <span class="string">&#x27;_&#x27;</span>, <span class="string">&#x27;、&#x27;</span>, <span class="string">&#x27;·&#x27;</span>, <span class="string">&#x27;—&#x27;</span>, <span class="string">&#x27; &#x27;</span>, <span class="string">&#x27;&#x27;</span>])</span><br><span class="line">    sentences = []</span><br><span class="line">    word_list = []</span><br><span class="line">    <span class="comment"># 对每段以句为单位进行切割</span></span><br><span class="line">    <span class="keyword">for</span> content <span class="keyword">in</span> contents:</span><br><span class="line">        content = content.string.strip()</span><br><span class="line">        sentences += content.split(<span class="string">&#x27;。&#x27;</span>)</span><br><span class="line">    <span class="comment"># 对每个句子进行分词并剔除符号</span></span><br><span class="line">    <span class="keyword">for</span> sentence <span class="keyword">in</span> sentences:</span><br><span class="line">        words = <span class="built_in">list</span>(<span class="built_in">set</span>(jieba.cut(sentence)).difference(signSet))</span><br><span class="line">        <span class="keyword">if</span> words != []:</span><br><span class="line">            word_list.append(words)</span><br><span class="line">    <span class="keyword">return</span> word_list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 词向量转化</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">word_2_vec</span>(<span class="params">word_list</span>):</span><br><span class="line">    model = Word2Vec(sentences=word_list, vector_size=<span class="number">50</span>,</span><br><span class="line">                     window=<span class="number">5</span>, min_count=<span class="number">1</span>, workers=<span class="number">4</span>)</span><br><span class="line">    key_vector = model.wv</span><br><span class="line">    <span class="keyword">del</span> model</span><br><span class="line">    key_vector.save(<span class="string">&quot;Word2Vec.vectors&quot;</span>)</span><br><span class="line">    dataFrame = pandas.DataFrame(</span><br><span class="line">        key_vector.get_normed_vectors(), index=<span class="literal">None</span>, columns=<span class="literal">None</span>)</span><br><span class="line">    dataFrame.iloc[:, <span class="number">0</span>] = key_vector.index_to_key</span><br><span class="line">    dataFrame.to_csv(<span class="string">&quot;word_vector.txt&quot;</span>, sep=<span class="string">&#x27; &#x27;</span>,</span><br><span class="line">                     index=<span class="literal">None</span>, columns=<span class="literal">None</span>, header=<span class="literal">None</span>)</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;most_similarity.txt&quot;</span>, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> word, similty <span class="keyword">in</span> key_vector.most_similar_cosmul(<span class="string">&quot;乌克兰&quot;</span>, topn=<span class="number">10</span>):</span><br><span class="line">            f.write(<span class="string">&quot;%s:%f\n&quot;</span> % (word, similty))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    contents = get_content(URL)</span><br><span class="line">    word_list = cut_content(contents)</span><br><span class="line">    word_2_vec(word_list)</span><br></pre></td></tr></table></figure>
+
+<h1 id="部分结果展示"><a href="#部分结果展示" class="headerlink" title="部分结果展示"></a>部分结果展示</h1><ul>
+<li><p>word vector</p>
+<blockquote>
+<p>的 0.0058858492 0.12066553 0.20914629 -0.21563469 -0.16776739 0.15213764 0.21432565 -0.119286254 -0.08731624 0.17215438 -0.040072374 -0.10367676 0.15514804 -0.11277259 -0.04171794 0.06816715 0.025557082 -0.1973873 -0.22306874 0.171648 0.12103257 0.16079599 0.017838348 0.15027793 -0.0792954 -0.024758397 0.13425715 -0.17815879 -0.09274285 -0.17730816 -0.022239646 0.22255392 -0.17130888 -0.057498917 -0.043764576 0.19425766 -0.13765344 0.0032506993 -0.1141257 -0.2198197 0.11778734 -0.20386471 -0.101685315 0.0036177472 -0.0053047533 -0.18163703 0.22279993 0.11803267 0.21638547<br>印尼 0.1201512 -0.10988128 0.021540971 0.22901182 -0.12178368 0.12133281 -0.17996345 -0.09695695 0.25153083 -0.04304534 0.0063681942 -0.10985162 -0.20536552 -0.04096755 0.06683232 -0.023345413 0.14973392 -0.0755892 0.059861608 0.14757377 0.22574995 -0.036905386 -0.24753058 0.118115805 0.01504206 0.1982893 -0.021619149 -0.07218729 -0.23484622 -0.023800096 0.075429164 0.14484045 0.18881908 -0.1547819 0.05049061 0.16553609 -0.12780425 -0.08262534 0.18113779 0.046517324 0.005316541 0.09365391 0.005991406 0.2602063 0.13682908 -0.24041681 -0.18958223 0.024905344 0.17185812<br>和 0.08693607 0.12461681 0.13627057 0.17877346 -0.14883298 0.02620427 0.14604934 -0.06988638 -0.14818339 -0.010269077 -0.20193754 -0.13264887 0.17022245 0.07961649 0.17344932 0.16301775 0.18120065 -0.09214681 -0.014518507 0.05716721 -0.10701523 0.20202306 -0.23575772 0.16228728 0.06989755 -0.11842499 0.10513848 -0.042883255 0.16009957 0.2376045 -0.10434236 -0.014658185 -0.13592291 0.090606935 0.067063466 0.16662803 0.14575776 0.2283216 0.221107 0.19033572 -0.16689162 -0.21812208 -0.0077297725 -0.07247088 0.18948534 0.14114341 -0.037645817 0.03658293 0.04277962</p>
+</blockquote>
+</li>
+<li><p>most similarity</p>
+<blockquote>
+<p>实现:0.704821<br>阵营:0.678554<br>北约:0.669797<br>亚太地区:0.666622<br>做强:0.660743<br>对抗:0.644343<br>鼓励:0.644281<br>行之有效:0.636537<br>宏观经济:0.635476<br>不应:0.624015</p>
+</blockquote>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">HogarHuang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="http://example.com/2022/07/30/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/NLP-Exercise2/">http://example.com/2022/07/30/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/NLP-Exercise2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post_share"><div class="social-share" data-image="/images/background.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://fastly.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/07/30/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/NLP-MidTermProj/"><img class="prev-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">NLP-MidTermProj IMDB电影评论文本分类</div></div></a></div><div class="next-post pull-right"><a href="/2022/07/30/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/NLP-Exercise1/"><img class="next-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">NLP-Exercise1 Text Tokenization</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A6%81%E6%B1%82"><span class="toc-number">1.</span> <span class="toc-text">题目要求</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81"><span class="toc-number">1.1.</span> <span class="toc-text">实现代码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%83%A8%E5%88%86%E7%BB%93%E6%9E%9C%E5%B1%95%E7%A4%BA"><span class="toc-number">2.</span> <span class="toc-text">部分结果展示</span></a></li></ol></div></div><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div></div></div></div></main><footer id="footer" style="background: #FFFFFF"><div id="footer-wrap"><div class="copyright">&copy;2022 By HogarHuang</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/chenxz21/hexo-theme-bcxm">Bcxm</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"></div><script type="text/javascript" src="https://fastly.jsdelivr.net/npm/leancloud-storage@4.10.0/dist/av-min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
