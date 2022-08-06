@@ -1,0 +1,362 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>OS-汇编相关-1</title><meta name="author" content="HogarHuang"><meta name="copyright" content="HogarHuang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="实验一报告一、实验目的1. 了解Linux下x86的汇编语言语法及编程环境2. 熟悉GNU汇编器、链接器及gcc的使用3. 了解32位环境和64位环境汇编的区别4. 学习汇编程序代码框架5. 学习mov系列指令的使用6. 了解32位下栈的实现机制及其与64位下的区别二、Linux下的x86汇编语言编程环境 在Linux下的汇编语言为AT＆T风格，与windows下的intel风格有着一些差异在 A">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-汇编相关-1">
+<meta property="og:url" content="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%961/index.html">
+<meta property="og:site_name" content="Hogar&#39;s Blog">
+<meta property="og:description" content="实验一报告一、实验目的1. 了解Linux下x86的汇编语言语法及编程环境2. 熟悉GNU汇编器、链接器及gcc的使用3. 了解32位环境和64位环境汇编的区别4. 学习汇编程序代码框架5. 学习mov系列指令的使用6. 了解32位下栈的实现机制及其与64位下的区别二、Linux下的x86汇编语言编程环境 在Linux下的汇编语言为AT＆T风格，与windows下的intel风格有着一些差异在 A">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://huanghj78.github.io/images/background.jpg">
+<meta property="article:published_time" content="2022-08-06T13:38:27.980Z">
+<meta property="article:modified_time" content="2022-08-06T13:52:57.692Z">
+<meta property="article:author" content="HogarHuang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huanghj78.github.io/images/background.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%961/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: HogarHuang","link":"Link: ","source":"Source: Hogar's Blog","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'OS-汇编相关-1',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-08-06 21:52:57'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hogar's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">OS-汇编相关-1</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">Created</span><time datetime="2022-08-06T13:38:27.980Z" title="Created 2022-08-06 21:38:27">2022-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="meta-secondline"></div></div></div><article class="post-content" id="article-container"><h1 id="实验一报告"><a href="#实验一报告" class="headerlink" title="实验一报告"></a>实验一报告</h1><h2 id="一、实验目的"><a href="#一、实验目的" class="headerlink" title="一、实验目的"></a>一、实验目的</h2><h3 id="1-了解Linux下x86的汇编语言语法及编程环境"><a href="#1-了解Linux下x86的汇编语言语法及编程环境" class="headerlink" title="1. 了解Linux下x86的汇编语言语法及编程环境"></a>1. 了解Linux下x86的汇编语言语法及编程环境</h3><h3 id="2-熟悉GNU汇编器、链接器及gcc的使用"><a href="#2-熟悉GNU汇编器、链接器及gcc的使用" class="headerlink" title="2. 熟悉GNU汇编器、链接器及gcc的使用"></a>2. 熟悉GNU汇编器、链接器及gcc的使用</h3><h3 id="3-了解32位环境和64位环境汇编的区别"><a href="#3-了解32位环境和64位环境汇编的区别" class="headerlink" title="3. 了解32位环境和64位环境汇编的区别"></a>3. 了解32位环境和64位环境汇编的区别</h3><h3 id="4-学习汇编程序代码框架"><a href="#4-学习汇编程序代码框架" class="headerlink" title="4. 学习汇编程序代码框架"></a>4. 学习汇编程序代码框架</h3><h3 id="5-学习mov系列指令的使用"><a href="#5-学习mov系列指令的使用" class="headerlink" title="5. 学习mov系列指令的使用"></a>5. 学习mov系列指令的使用</h3><h3 id="6-了解32位下栈的实现机制及其与64位下的区别"><a href="#6-了解32位下栈的实现机制及其与64位下的区别" class="headerlink" title="6. 了解32位下栈的实现机制及其与64位下的区别"></a>6. 了解32位下栈的实现机制及其与64位下的区别</h3><h2 id="二、Linux下的x86汇编语言编程环境"><a href="#二、Linux下的x86汇编语言编程环境" class="headerlink" title="二、Linux下的x86汇编语言编程环境"></a>二、Linux下的x86汇编语言编程环境</h2><ul>
+<li>在Linux下的汇编语言为AT＆T风格，与windows下的intel风格有着一些差异<br><strong>在 AT&amp;T 汇编格式中</strong></li>
+</ul>
+<ol>
+<li>寄存器名要加上 ‘%’ 作为前缀</li>
+<li>用 ‘$’ 前缀表示一个立即操作数</li>
+<li>目标操作数在源操作数的右边</li>
+<li>操作数的字长由操作符的最后一个字母决定，后缀’b’、’w’、’l’分别表示操作数为byte、word和long，分别代表1、2、4个字节</li>
+<li>存操作数的寻址方式是section:disp(base, index, scale)</li>
+</ol>
+<ul>
+<li>当汇编程序中调用了C的函数，则需注意在链接时需要动态链接C函数库</li>
+<li>对于汇编程序的调试，在编译源代码时需要使用-gstabs参数重新汇编源代码，然后使用gdb进行调试</li>
+</ul>
+<h2 id="三、技术日志"><a href="#三、技术日志" class="headerlink" title="三、技术日志"></a>三、技术日志</h2><h3 id="Chapter-04"><a href="#Chapter-04" class="headerlink" title="Chapter 04"></a>Chapter 04</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><ol>
+<li>汇编程序三部分：<ul>
+<li>.section .data</li>
+<li>.section .bss</li>
+<li>.section .text</li>
+</ul>
+</li>
+<li>程序的开端<ul>
+<li>GNU汇编器使用_start声明要处理的第一条指令的位置，也可以使用其它的命名，但在链接器命令中需要使用-c参数进行指定。</li>
+<li>为了能够访问_start，还需要将它定义为全局</li>
+</ul>
+</li>
+<li>简单的例子</li>
+<li>代码的编译、连接、执行<ul>
+<li>利用as和ld，需要加上特定参数，–32，-m elf_i386等</li>
+<li>利用gcc，需要加上特定参数，-no-pie等</li>
+</ul>
+</li>
+<li>Debug<ul>
+<li>利用gdb</li>
+</ul>
+</li>
+<li>使用C库函数的例子 —— printf，exit</li>
+</ol>
+<h4 id="验证cpuid"><a href="#验证cpuid" class="headerlink" title="验证cpuid"></a>验证cpuid</h4><p><img src="https://i.loli.net/2021/03/02/3TYwjLrXxnEUIaH.png" alt="cpuid.png"></p>
+<ul>
+<li>对于汇编程序的编译通常使用指令as</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">as -o filename.o filename.s</span><br></pre></td></tr></table></figure>
+
+<p><em>实际上.o文件的名字也可以随便取</em></p>
+<ul>
+<li>对于汇编程序的链接通常使用指令ld</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ld -o filename filename.o</span><br></pre></td></tr></table></figure>
+
+<p><em>同样，可执行文件的名字也可以随便取</em></p>
+<ul>
+<li>输出的结果是厂商的ID，执行指令cpuid后，会将ID字符串分散在寄存器ebx、edx、ecx中，因此需要使用movl指令将其中的值移到相对存有待输出的字符串output对应的寄存器的偏移地址中，output字符串中的x则会被替代会相应的字符，最后通过系统调用（int $0x80）实现输出。</li>
+</ul>
+<p><strong>使用gcc进行编译链接</strong><br><img src="https://i.loli.net/2021/03/02/iTQrkc8MgNUl23m.png" alt="gccforcpuid.png"></p>
+<ul>
+<li>若要使用gcc，需要将源代码中的_start改为main，同时，由于Linux版本原因，需要额外加多参数-no-pie以保证正常的编译链接</li>
+</ul>
+<h4 id="验证cpuid2"><a href="#验证cpuid2" class="headerlink" title="验证cpuid2"></a>验证cpuid2</h4><p><img src="https://i.loli.net/2021/03/02/2GDiSJ7YduKyXco.png" alt="cpuid2.png"></p>
+<ul>
+<li>由于汇编代码与Linux位数不一致，为保证编译链接的正确，在使用as进行编译时需要增加参数–32使代码编译为32位，再在使用ld链接时增加参数-m elf_i386，才能链接成功</li>
+<li>printf函数具有多个输入参数<ul>
+<li>第一个参数：输出的字符串</li>
+<li>第二个参数：缓冲区的值</li>
+</ul>
+</li>
+<li>为了把参数传给printf函数，需要利用pushl指令将他们压入栈中，且压入栈的顺序应与printf函数获取它们的顺序相反。参数压栈完毕之后则可通过call printf调用函数实现输出。然后通过addl $8,%esp指令将压入栈中的参数清空。</li>
+</ul>
+<h4 id="Debug"><a href="#Debug" class="headerlink" title="Debug"></a>Debug</h4><ul>
+<li>为了调试汇编程序，需要使用-gstabs参数重新汇编源代码,然后链接</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">as -gstabs -o cpuid.o cpuid.s</span><br><span class="line">ld -o cpuid cpuid.o</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>编译链接之后即可使用gdb</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb cpuid</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>常用指令<ul>
+<li>运行程序 run</li>
+<li>设置断点 break</li>
+<li>单步运行 next</li>
+<li>继续运行 continue</li>
+<li>退出gdb ctrl+z</li>
+</ul>
+</li>
+</ul>
+<h3 id="Chapter-05"><a href="#Chapter-05" class="headerlink" title="Chapter 05"></a>Chapter 05</h3><h4 id="知识点-1"><a href="#知识点-1" class="headerlink" title="知识点"></a>知识点</h4><ol>
+<li>定义数据元素<ul>
+<li>数据段</li>
+<li>静态符号</li>
+<li>bss段</li>
+</ul>
+</li>
+<li>传送数据元素<ul>
+<li>mov指令——movx source destination，其中x可为l，w，b</li>
+<li>传送立即数</li>
+<li>寄存器之间的数据传送</li>
+<li>内存与寄存器之间的传送</li>
+</ul>
+</li>
+<li>条件传送指令<ul>
+<li>cmov指令——cmovx source destination，x为触发传送指令的条件，条件取决于EFLAG寄存器的值</li>
+</ul>
+</li>
+<li>交换数据<ul>
+<li>数据交换指令：XHCG,BSWAP,XADD,CMPCHG,CMPXCHG8B</li>
+</ul>
+</li>
+<li>栈<ul>
+<li>工作原理</li>
+<li>栈的操作——push，pop，可用于16位或32为数据</li>
+</ul>
+</li>
+<li>优化内存访问</li>
+</ol>
+<h4 id="验证sizetest"><a href="#验证sizetest" class="headerlink" title="验证sizetest"></a>验证sizetest</h4><p><img src="https://i.loli.net/2021/03/02/dMxm8aiosrczjYp.png" alt="sizetest.png"></p>
+<ul>
+<li>bss段中声明的数据不包含在可执行程序中，而在数据段定义的数据会被包含在可执行程序中。</li>
+<li>.fill命令使汇编器自动创建10000个数据元素，可看出缓冲区的10000个字节被添加到可执行文件中。</li>
+</ul>
+<h4 id="验证movtest"><a href="#验证movtest" class="headerlink" title="验证movtest"></a>验证movtest</h4><p><img src="https://i.loli.net/2021/03/03/aB3Q7iUMltwV8An.png" alt="movtest1.png"></p>
+<ul>
+<li>movtest1执行完movl value,%ecx之后，%ecx寄存器的值由0变为1</li>
+</ul>
+<p><img src="https://i.loli.net/2021/03/03/SXzWHFKjb579RkP.png" alt="movtest2.png"></p>
+<ul>
+<li>movtest2执行完movl %eax,value之后，value所代表的内存中的值由1变为100</li>
+</ul>
+<p><img src="https://i.loli.net/2021/03/03/5Gn8ukdP7of3iOT.png" alt="movtest3.png"></p>
+<ul>
+<li>movtest3使用了变址寻址，通过改变%edi寄存器的值来改变地址的偏移量，实现了对values对应数组的遍历，从而将values数组的值逐个输出。</li>
+</ul>
+<p><img src="https://i.loli.net/2021/03/03/3kvPOUCHIVDwuMp.png" alt="movtest4.png"></p>
+<ul>
+<li>movtest4使用了间接寻址，通过将values对应的内存地址存放在%edi寄存器中，加上偏移量而实现对values数组的访问并修改。于是，在执行指令movl $100,4(%edi)之后，values数组第二个元素的值由15变为100.</li>
+</ul>
+<h4 id="验证cmovtest"><a href="#验证cmovtest" class="headerlink" title="验证cmovtest"></a>验证cmovtest</h4><p><img src="https://i.loli.net/2021/03/02/yTPA5kwBs93l4Dx.png" alt="cmovtest.png"></p>
+<ul>
+<li>comv指令要通过利用EFLAGS寄存器中的值来作为判断条件，因此通常前面需要有其它的指令能使得EFLAGS寄存器发生改变，如cmovtest程序通过指令cmp %ebx，%eax比较两个寄存器之间的值，然后便可使用cmova来实现条件的数据转移，当%ebx寄存器的值大于%eax，则会将%eax的值赋给%ebx</li>
+</ul>
+<h4 id="验证swaptest"><a href="#验证swaptest" class="headerlink" title="验证swaptest"></a>验证swaptest</h4><p><img src="https://i.loli.net/2021/03/02/Bm42xXISDaGpFvJ.png" alt="swaptest.png"></p>
+<ul>
+<li>通过执行bswap指令，寄存器中各个字节的位置进行了交换，但需要注意的是单独一个字节的值并没有发生变化，即可由little-endian的存储方式转变为big-endian，反之亦然。</li>
+</ul>
+<h4 id="验证cmpxchgtest"><a href="#验证cmpxchgtest" class="headerlink" title="验证cmpxchgtest"></a>验证cmpxchgtest</h4><p><img src="https://i.loli.net/2021/03/03/xzWjp4g2XsvdtaJ.png" alt="cmpxchgtest.png"></p>
+<ul>
+<li>在执行cmpxchg指令之前，data中的值为5，执行之后，由于其与eax寄存器中的值不相等，故data中的值被更改为eax寄存器中的值。</li>
+</ul>
+<h4 id="验证cmpxchg8test"><a href="#验证cmpxchg8test" class="headerlink" title="验证cmpxchg8test"></a>验证cmpxchg8test</h4><p><img src="https://i.loli.net/2021/03/03/2nifAEgwk6vMzyP.png" alt="cmpxchg8btest.png"></p>
+<ul>
+<li>执行指令cmpxchg8b data,使得data中的值与edx:eax寄存器中的值进行比较（均为8个字节），由于不相等，故把ecx:ebx寄存器中的值赋给data指向的内存</li>
+</ul>
+<h4 id="验证bubble"><a href="#验证bubble" class="headerlink" title="验证bubble"></a>验证bubble</h4><p><img src="https://i.loli.net/2021/03/03/lgVkY9IjS7y5EQr.png" alt="bubble.png"></p>
+<ul>
+<li>此代码即为冒泡排序的汇编代码，主要就是通过比较被加载到eax寄存器中的值与esi寄存器指向的值，满足条件则用xchg指令实现交换，由此每一趟循环便可找出最大或最小的值，从而实现冒泡。</li>
+</ul>
+<h4 id="验证pushpop"><a href="#验证pushpop" class="headerlink" title="验证pushpop"></a>验证pushpop</h4><p><img src="https://i.loli.net/2021/03/03/dULqlHaG8vkIJgR.png" alt="pushpop.png"></p>
+<ul>
+<li>将所有寄存器push进栈之后esp指针的地址为：0xffffcf3e</li>
+<li>将所有寄存器push进栈之后esp指针的地址为：0xffffcf50</li>
+<li>相减结果为18（十进制）—— 验证：4条pushl指令和1条pushw指令，即进栈的字节大小为：4*4+2&#x3D;18</li>
+</ul>
+<h2 id="四、遇到的问题及解决方案"><a href="#四、遇到的问题及解决方案" class="headerlink" title="四、遇到的问题及解决方案"></a>四、遇到的问题及解决方案</h2><ol>
+<li>在验证使用gcc编译程序的时候遇到了链接失败的问题<br>经查询资料，发现问题在于：我的Ubuntu版本为18.04，而Ubuntu从16.10版本开始就默认启用了PIE，导致编译之后的文件无法链接，故解决的方案为：在使用gcc的时候增加参数 -no-pie 即可。</li>
+<li>在验证cpuid2.s时，运行编译链接后的程序报错：正在访问一个已毁坏的共享库。后来询问同学，得知可能是由于汇编代码与Linux位数不一致导致的，于是上网进行搜索，得知可增加参数，将指令改为</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">as --32 -o cpuid2.o cpuid2.s</span><br><span class="line">ld -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -o cpuid2 -lc cpuid2.o</span><br></pre></td></tr></table></figure>
+
+<p>但此时报了另外一个错误：找不到-lc<br>于是再次上网搜索，发现问题在于缺少了可用于链接的32位版本的libc<br>于是在命令行进行了安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libc6:i386 libc6-dev-i386</span><br></pre></td></tr></table></figure>
+
+<p>之后便可正确得到结果。<br>3. 在验证pushpop.s时，在编译的时候产生警告：’%eax’ not allowed with ‘movb’<br>经检查源代码发现以下指令出错，movb是对应的操作数应是一个字节，而%eax寄存器是四个字节大小，因此将%eax改为%al即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">movb $100,%eax</span><br></pre></td></tr></table></figure>
+
+<p>而修改之后虽然编译时没有出现警告或错误，但在运行的时候提示出现了段错误，后来发现原因在于此代码使用到了栈，之前以为只有在调用到C函数的时候才需要将代码编译成32位，现在才发现因为32位和64位的栈有所不同，因此此代码的编译链接同样需要增加参数，具体指令为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">as --32 -o pushpop.o pushpop.s</span><br><span class="line">ld -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -o pushpop -lc pushpop.o</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">HogarHuang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%961/">https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%961/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post_share"><div class="social-share" data-image="/images/background.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://fastly.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%962/"><img class="prev-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">OS-汇编相关-2</div></div></a></div><div class="next-post pull-right"><a href="/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%963/"><img class="next-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">OS-汇编相关-3</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E4%B8%80%E6%8A%A5%E5%91%8A"><span class="toc-number">1.</span> <span class="toc-text">实验一报告</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%9E%E9%AA%8C%E7%9B%AE%E7%9A%84"><span class="toc-number">1.1.</span> <span class="toc-text">一、实验目的</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BA%86%E8%A7%A3Linux%E4%B8%8Bx86%E7%9A%84%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E8%AF%AD%E6%B3%95%E5%8F%8A%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 了解Linux下x86的汇编语言语法及编程环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%86%9F%E6%82%89GNU%E6%B1%87%E7%BC%96%E5%99%A8%E3%80%81%E9%93%BE%E6%8E%A5%E5%99%A8%E5%8F%8Agcc%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 熟悉GNU汇编器、链接器及gcc的使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BA%86%E8%A7%A332%E4%BD%8D%E7%8E%AF%E5%A2%83%E5%92%8C64%E4%BD%8D%E7%8E%AF%E5%A2%83%E6%B1%87%E7%BC%96%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 了解32位环境和64位环境汇编的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%AD%A6%E4%B9%A0%E6%B1%87%E7%BC%96%E7%A8%8B%E5%BA%8F%E4%BB%A3%E7%A0%81%E6%A1%86%E6%9E%B6"><span class="toc-number">1.1.4.</span> <span class="toc-text">4. 学习汇编程序代码框架</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%AD%A6%E4%B9%A0mov%E7%B3%BB%E5%88%97%E6%8C%87%E4%BB%A4%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.1.5.</span> <span class="toc-text">5. 学习mov系列指令的使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E4%BA%86%E8%A7%A332%E4%BD%8D%E4%B8%8B%E6%A0%88%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6%E5%8F%8A%E5%85%B6%E4%B8%8E64%E4%BD%8D%E4%B8%8B%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.1.6.</span> <span class="toc-text">6. 了解32位下栈的实现机制及其与64位下的区别</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Linux%E4%B8%8B%E7%9A%84x86%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83"><span class="toc-number">1.2.</span> <span class="toc-text">二、Linux下的x86汇编语言编程环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%8A%80%E6%9C%AF%E6%97%A5%E5%BF%97"><span class="toc-number">1.3.</span> <span class="toc-text">三、技术日志</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Chapter-04"><span class="toc-number">1.3.1.</span> <span class="toc-text">Chapter 04</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81cpuid"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">验证cpuid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81cpuid2"><span class="toc-number">1.3.1.3.</span> <span class="toc-text">验证cpuid2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Debug"><span class="toc-number">1.3.1.4.</span> <span class="toc-text">Debug</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Chapter-05"><span class="toc-number">1.3.2.</span> <span class="toc-text">Chapter 05</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9-1"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81sizetest"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">验证sizetest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81movtest"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">验证movtest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81cmovtest"><span class="toc-number">1.3.2.4.</span> <span class="toc-text">验证cmovtest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81swaptest"><span class="toc-number">1.3.2.5.</span> <span class="toc-text">验证swaptest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81cmpxchgtest"><span class="toc-number">1.3.2.6.</span> <span class="toc-text">验证cmpxchgtest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81cmpxchg8test"><span class="toc-number">1.3.2.7.</span> <span class="toc-text">验证cmpxchg8test</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81bubble"><span class="toc-number">1.3.2.8.</span> <span class="toc-text">验证bubble</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81pushpop"><span class="toc-number">1.3.2.9.</span> <span class="toc-text">验证pushpop</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.4.</span> <span class="toc-text">四、遇到的问题及解决方案</span></a></li></ol></li></ol></div></div><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div></div></div></div></main><footer id="footer" style="background: #FFFFFF"><div id="footer-wrap"><div class="copyright">&copy;2022 By HogarHuang</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/chenxz21/hexo-theme-bcxm">Bcxm</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://fastly.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><script type="text/javascript" src="https://fastly.jsdelivr.net/npm/leancloud-storage@4.10.0/dist/av-min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

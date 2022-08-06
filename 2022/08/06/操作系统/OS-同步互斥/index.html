@@ -1,0 +1,368 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>OS-同步互斥相关-1</title><meta name="author" content="HogarHuang"><meta name="copyright" content="HogarHuang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="LabWeek15 实验报告内容一alg.18-1-syn-fetch-1,2,3.c原理性解释 这几份代码是验证gcc的__sync_原子操作家族中的__sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。 type __sync_fetch_and_add (type *ptr, type value)：取ptr指向的变量的值，加上va">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-同步互斥相关-1">
+<meta property="og:url" content="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E5%90%8C%E6%AD%A5%E4%BA%92%E6%96%A5/index.html">
+<meta property="og:site_name" content="Hogar&#39;s Blog">
+<meta property="og:description" content="LabWeek15 实验报告内容一alg.18-1-syn-fetch-1,2,3.c原理性解释 这几份代码是验证gcc的__sync_原子操作家族中的__sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。 type __sync_fetch_and_add (type *ptr, type value)：取ptr指向的变量的值，加上va">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://huanghj78.github.io/images/background.jpg">
+<meta property="article:published_time" content="2022-08-06T15:14:42.942Z">
+<meta property="article:modified_time" content="2022-08-06T15:14:59.214Z">
+<meta property="article:author" content="HogarHuang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huanghj78.github.io/images/background.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E5%90%8C%E6%AD%A5%E4%BA%92%E6%96%A5/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: HogarHuang","link":"Link: ","source":"Source: Hogar's Blog","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'OS-同步互斥相关-1',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-08-06 23:14:59'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hogar's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">OS-同步互斥相关-1</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">Created</span><time datetime="2022-08-06T15:14:42.942Z" title="Created 2022-08-06 23:14:42">2022-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="meta-secondline"></div></div></div><article class="post-content" id="article-container"><h1 id="LabWeek15-实验报告"><a href="#LabWeek15-实验报告" class="headerlink" title="LabWeek15 实验报告"></a>LabWeek15 实验报告</h1><h2 id="内容一"><a href="#内容一" class="headerlink" title="内容一"></a>内容一</h2><h3 id="alg-18-1-syn-fetch-1-2-3-c"><a href="#alg-18-1-syn-fetch-1-2-3-c" class="headerlink" title="alg.18-1-syn-fetch-1,2,3.c"></a>alg.18-1-syn-fetch-1,2,3.c</h3><h4 id="原理性解释"><a href="#原理性解释" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
+<li>这几份代码是验证gcc的__sync_原子操作家族中的__sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。</li>
+<li>type __sync_fetch_and_add (type *ptr, type value)：取ptr指向的变量的值，加上value之后再赋值给ptr指向的变量，整个过程是一个原子操作。</li>
+<li>type __sync_add_and_fetch (type *ptr, type value)：将ptr指向的变量加上value之后再去ptr指向的变量的值，同样的，整个过程是原子操作。</li>
+<li>这两个函数类似于前自增和后自增，前者对应后自增，后者对应前自增。</li>
+</ul>
+<h4 id="细节性解释"><a href="#细节性解释" class="headerlink" title="细节性解释"></a>细节性解释</h4><h5 id="alg-18-1-syn-fetch-1-c"><a href="#alg-18-1-syn-fetch-1-c" class="headerlink" title="alg.18-1-syn-fetch-1.c"></a>alg.18-1-syn-fetch-1.c</h5><ul>
+<li>通过分别对<code>i = 10;</code>执行<code>__sync_fetch_and_add(&amp;i, 20)</code>和<code> __sync_add_and_fetch(&amp;i, 20)</code>，输出函数返回值，同一语句中i的值和下一条语句i的值，探究并比较两个函数的作用及区别。</li>
+<li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/27/98ccb4f595884/1.png" alt="1.png"><br>可以看到，两个函数的返回值不相同，一个返回的是i初始的值，另一个返回的是i增加之后的值，这一点与自增类似，如下<br><img src="https://pic.gksec.com/2021/05/28/8bc25bb3cf2d1/4.png" alt="4.png"><br>不同的是，当使用上述两个函数的时候，在同一个printf语句中，i的值不变，仍为10。<br>到了第二个printf语句，输出的i自然是加上20之后的值——30</li>
+</ul>
+<h5 id="alg-18-1-syn-fetch-2-c"><a href="#alg-18-1-syn-fetch-2-c" class="headerlink" title="alg.18-1-syn-fetch-2.c"></a>alg.18-1-syn-fetch-2.c</h5><ul>
+<li>通过创建40个线程，共同对count进行自增操作，使用__sync_fetch_and_add(&amp;count, 1)实现互斥同步，即任一时刻最多只能有一个线程能够操作counter，从而保证了结果的正确性。</li>
+<li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/28/e59e45245f750/2.png" alt="2.png"><br>40个线程，分别令counter自增了2000次，因此最后counter为80000，结果正确。</li>
+</ul>
+<h5 id="alg-18-1-syn-fetch-3-c"><a href="#alg-18-1-syn-fetch-3-c" class="headerlink" title="alg.18-1-syn-fetch-3.c"></a>alg.18-1-syn-fetch-3.c</h5><ul>
+<li>在上一个的程序的基础上，将__sync_fetch_and_add(&amp;count, 1)改为普通的自增，即counter++，此时无法实现互斥同步，因此结果出错。</li>
+<li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/28/a4d6e88a56450/3.png" alt="3.png"></li>
+</ul>
+<h3 id="alg-18-2-syn-compare-test-c"><a href="#alg-18-2-syn-compare-test-c" class="headerlink" title="alg.18-2-syn-compare-test.c"></a>alg.18-2-syn-compare-test.c</h3><h4 id="原理性解释-1"><a href="#原理性解释-1" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
+<li>此程序是对以下四个函数功能的验证。</li>
+<li>bool __sync_bool_compare_and_swap (type* ptr, type oldval, type newval):比较* ptr与oldval的值，如果两者相等，则将newval更新到*ptr并返回true，否则返回false</li>
+<li>type __sync_val_compare_and_swap (type* ptr, type oldval type newval, …)：比较* ptr与oldval的值，如果两者相等，则将newval更新到<em>ptr并返回操作*<em>之前</em></em> <em>ptr的值，否则单纯返回操作*<em>之前</em></em> *ptr</li>
+<li>type __sync_lock_test_and_set (type * ptr, type value)： 将value写入* ptr，对* ptr加锁，并返回操作之前*ptr的值</li>
+<li>void __sync_lock_release (type* ptr, …)：将0写入到* ptr，并对*ptr解锁</li>
+</ul>
+<h4 id="细节性解释-1"><a href="#细节性解释-1" class="headerlink" title="细节性解释"></a>细节性解释</h4><ul>
+<li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/28/3981b6e5367df/5.png" alt="5.png"></li>
+<li>首先调用__sync_bool_compare_and_swap()函数，要修改的值value为200000，指定alue原先的值oldvalue为123456，将要新赋给value的值newvalue为654321，由于value不等于oldvalue，故不会将newvalue赋值给value，因此返回值为为false，即0。value仍为200000</li>
+<li>再次调用__sync_bool_compare_and_swap()函数，要修改的值value为200000，指定alue原先的值oldvalue为200000，将要新赋给value的值newvalue为654321，由于value等于oldvalue，故会将newvalue赋值给value，因此返回值为为true，即1。value变为654321</li>
+<li>接着调用__sync_val_compare_and_swap()函数，要修改的值value为200000，指定alue原先的值oldvalue为123456，将要新赋给value的值newvalue为654321，由于value不等于oldvalue，故不会将newvalue赋值给value，因此返回值为200000。value仍为200000</li>
+<li>再次调用__sync_bool_compare_and_swap()函数，要修改的值value为200000，指定alue原先的值oldvalue为200000，将要新赋给value的值newvalue为654321，由于value等于oldvalue，故会将newvalue赋值给value，因此返回值为200000。value变为654321</li>
+<li>调用__sync_lock_test_and_set()函数，value的值为200000，将要新赋给value的值newvalue为654321，因此value的值被赋值为654321并返回了其原先的值200000，对value加锁</li>
+<li>最后调用__sync_lock_release()函数，对value解锁并将其赋值为0</li>
+</ul>
+<h3 id="alg-18-3-syn-pthread-mutex-c"><a href="#alg-18-3-syn-pthread-mutex-c" class="headerlink" title="alg.18-3-syn-pthread-mutex.c"></a>alg.18-3-syn-pthread-mutex.c</h3><h4 id="原理性解释-2"><a href="#原理性解释-2" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
+<li>此程序是利用POSIX的互斥锁实现同步互斥，用到的主要函数如下：</li>
+<li>int pthread_mutex_init(pthread_mutex_t *restrict mutex,const pthread_mutexattr_t *restrict attr)：对互斥锁变量进行初始化，参数attr指定了初始化属性，若为NULL，则使用默认属性，此时等价于<code>pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;</code>。函数成功完成之后会返回零，其他任何返回值都表示出现了错误。</li>
+<li>int pthread_mutex_lock(pthread_mutex_t *mutex)：对互斥锁加锁。</li>
+<li>int pthread_mutex_unlock(pthread_mutex_t *mutex)：对互斥锁解锁，由于一个线程上锁之后，只有解锁了才能够继续上锁，因此互斥锁上锁之后到解锁之前的区域至多只能有一个线程可以访问，由此实现了互斥。</li>
+<li>int pthread_mutex_trylock(pthread_mutex_t *mutex)：销毁互斥锁</li>
+</ul>
+<h4 id="细节性解释-2"><a href="#细节性解释-2" class="headerlink" title="细节性解释"></a>细节性解释</h4><ul>
+<li>定义了两个线程函数，功能均为对count进行20000次自增操作，区别在于一个使用了互斥锁对count的自增操作加锁，而另一个没有</li>
+<li>主函数根据输入的参数选择调用其子一个线程函数，每次会创建40个子线程，即有40个子线程并发对count进行操作。</li>
+<li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/28/d7e18d12e6d8e/6.png" alt="6.png"></li>
+<li>可以看到，当使用了互斥锁之后，count的结果是正确的，若没有使用，则结果错误。</li>
+</ul>
+<h3 id="alg-18-4-syn-pthread-sem-unnamed-c"><a href="#alg-18-4-syn-pthread-sem-unnamed-c" class="headerlink" title="alg.18-4-syn-pthread-sem-unnamed.c"></a>alg.18-4-syn-pthread-sem-unnamed.c</h3><h4 id="原理性解释-3"><a href="#原理性解释-3" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
+<li>此程序使用了POSIX的无名信号量来实现同步互斥，主要用的函数如下</li>
+<li>int sem_init(sem_t *sem, int pshared, unsigned int value)：初始化由 sem 指向的信号对象，并给它一个初始的整数值 value。pshared 控制信号量的类型，值为 0 代表该信号量用于多线程间的同步，值如果大于 0 表示可以共享，用于多个相关进程间的同步。</li>
+<li>int sem_wait(sem_t *sem)：是一个阻塞的函数，测试所指定信号量的值，它的操作是原子的。若 sem value &gt; 0，则该信号量值减去 1 并立即返回。若sem value &#x3D; 0，则阻塞直到 sem value &gt; 0，此时立即减去 1，然后返回。</li>
+<li>int sem_post(sem_t *sem)：指定的信号量 sem 的值加 1，唤醒正在等待该信号量的任意线程</li>
+<li>int sem_destroy(sem_t *sem)：用于对用完的信号量的清理。</li>
+<li>在sem_wait和sem_post之间的即为临界区域。</li>
+</ul>
+<h4 id="细节性解释-3"><a href="#细节性解释-3" class="headerlink" title="细节性解释"></a>细节性解释</h4><ul>
+<li>与上一个程序类似，定义两个线程函数，一个用信号量实现count++的同步，另一个单纯使用count++</li>
+<li>主函数中对信号量进行初始化，并根据传入的参数选择调用相应的线程函数</li>
+<li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/28/160f851100d20/7.png" alt="7.png"></li>
+<li>与使用互斥锁效果一样，当使用了信号量之后count结果正确，否则结果错误。</li>
+<li>实际上，由于信号量初始化的值为1，此时其与互斥锁的功能是一样的，当将其初始化的值改为大于1，如改为100，如下：<br><img src="https://pic.gksec.com/2021/05/28/8b9c43f911f1f/8.png" alt="8.png"><br><img src="https://pic.gksec.com/2021/05/28/9b924bfe8379e/9.png" alt="9.png"></li>
+<li>可以看到，即使使用了信号量，结果仍为错误的，可见，要注意信号量的初始化值，当其为1时，作用与互斥锁类似。</li>
+</ul>
+<h3 id="alg-18-5-syn-pthread-sem-named-c"><a href="#alg-18-5-syn-pthread-sem-named-c" class="headerlink" title="alg.18-5-syn-pthread-sem-named.c"></a>alg.18-5-syn-pthread-sem-named.c</h3><h4 id="原理性解释-4"><a href="#原理性解释-4" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
+<li>此程序使用了POSIX的命名信号量来实现同步互斥，命名信号量即信号量有一个名称，不同进程可以通过该名字得到对应的信号量并进行操作。因此无名信号量和命名信号量的主要区别在于前者用于线程间的同步互斥而后者用于进程间的同步互斥。无名信号量直接保存在内存中，而命名信号量要求创建一个文件。</li>
+<li>主要用的函数如下：</li>
+<li>sem_t *sem_open(const char *name, int oflag)或 sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)，前者用于信号量存在时，打开该信号量。后者用于信号量不存在时，创建一个信号量。<ul>
+<li>name表示信号量文件名；</li>
+<li>flags表示sem_open() 函数的行为标志；</li>
+<li>mode表示文件权限；</li>
+<li>value表示信号量初始值</li>
+<li>返回值：成功：信号量的地址；失败：SEM_FAILED</li>
+</ul>
+</li>
+<li>int sem_close(sem_t *sem)：关闭sem指向的信号量。成功返回0，失败返回-1</li>
+<li>int sem_unlink(const char *name)：删除有名信号量的文件。成功返回0，失败返回-1</li>
+<li>int sem_wait(sem_t *sem)：与无名信号量一样</li>
+<li>int sem_post(sem_t *sem)：与无名信号量一样</li>
+</ul>
+<h4 id="细节性解释-4"><a href="#细节性解释-4" class="headerlink" title="细节性解释"></a>细节性解释</h4><ul>
+<li>此程序中，全局变量是一个指向信号量变量的指针named_sem，存放sem_open()函数的返回值，指向了一个线程之间可以共同感知的空间，因此调用相关函数的时候不需要再取地址。</li>
+<li>两个线程函数的实现与上一个程序一样，一个使用了命名信号量，一个没有使用。</li>
+<li>主函数中除了对命名信号量的初始化与无名信号量不同以外，其他与上一个程序一样。命名信号量是使用sem_open()进行初始化，并在最后以此调用sem_close()和sem_unlink()关闭信号量并删除对应的文件。</li>
+<li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/28/9864d98b6bbb2/10.png" alt="10.png"></li>
+<li>同样的，当使用了信号量之后count结果正确，否则结果错误。</li>
+<li>实际上，该程序将named_sem作为了全局变量，似乎体现不出命名信号量的优势所在，可改为如下图所示，结果仍然正确<br><img src="https://pic.gksec.com/2021/05/28/5a57bbe80c49e/11.png" alt="11.png"><br><img src="https://pic.gksec.com/2021/05/28/b0efdb4a9b982/12.png" alt="12.png"></li>
+</ul>
+<h3 id="alg-18-6-syn-pc-con-6，7，8"><a href="#alg-18-6-syn-pc-con-6，7，8" class="headerlink" title="alg.18-6-syn-pc-con-6，7，8"></a>alg.18-6-syn-pc-con-6，7，8</h3><h4 id="原理性解释-5"><a href="#原理性解释-5" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
+<li>这几个程序实现的是多线程的生产者消费者问题，通过使用信号量来实现同步互斥问题。</li>
+</ul>
+<h4 id="细节性解释-5"><a href="#细节性解释-5" class="headerlink" title="细节性解释"></a>细节性解释</h4><h5 id="alg-18-6-syn-pc-con-6-h"><a href="#alg-18-6-syn-pc-con-6-h" class="headerlink" title="alg.18-6-syn-pc-con-6.h"></a>alg.18-6-syn-pc-con-6.h</h5><ul>
+<li>定义了共享内存的结构体变量，共享内存中存放了控制用的数据（结构体ctln_pc_st）和问题相关的数据（data_pc_st），通过一个偏移量BASE_ADDR将两者隔开，即共享内存中前面一部分存放了用于控制的相关数据，后面是一个存放生产者生产的产品的循环队列。故要访问循环队列则需要加上偏移量BASE_ADDR</li>
+</ul>
+<h5 id="alg-18-6-syn-pc-con-6-c"><a href="#alg-18-6-syn-pc-con-6-c" class="headerlink" title="alg.18-6-syn-pc-con-6.c"></a>alg.18-6-syn-pc-con-6.c</h5><ul>
+<li>此为控制台程序，主要功能是创建并初始化共享内存，创建生产者和消费者进程。</li>
+<li>首先是先由用户输入确定共享内存中产品缓存区大小buffer_size，所需要生产的产品数max_item_num，生产者数目thread_pro和消费者数目thread_cons</li>
+<li>然后由传入主函数的文件名创建共享内存，接着对共享内存中的数据以及信号量进行初始化。<ul>
+<li>信号量stock用于缓冲区被占用的数目的同步</li>
+<li>信号量sem_mutex用于共享内存的互斥</li>
+<li>信号量emptyslot用于缓冲区中的空位置数目的同步</li>
+</ul>
+</li>
+<li>然后利用vfork()和execv()的组合生成两个进程分别去创建生产者和消费者线程。</li>
+<li>最后等到两个子进程结束，即意味着生产消费完成，便销毁信号量并删除共享内存。</li>
+</ul>
+<h5 id="alg-18-7-syn-pc-producer-6-c"><a href="#alg-18-7-syn-pc-producer-6-c" class="headerlink" title="alg.18-7-syn-pc-producer-6.c"></a>alg.18-7-syn-pc-producer-6.c</h5><ul>
+<li>此程序为生产者程序，主函数实现的是根据传入的参数得到共享内存的ID，从而通过shmat()能够访问共享内存。接着通过pthread_create()生成生产者线程。最后等到生产者线程均结束之后，调用了THREAD_CONS - 1次的sem_post(&amp;ctln-&gt;stock)<code>防止出现当循环队列中没有产品且生产产品数以达到要求时，生产者线程不再进入共享内存而导致一些消费者线程卡在了 sem_wait(&amp;ctln-&gt;stock); 无法正常结束的情况 。</code>。最后断开与共享内存的连接。</li>
+<li>生产者线程函数实现的是往共享内存中的循环队列加入一个新的元素，即生产一个产品。当目前生产的产品数未达到所需时，便尝试进入共享内存，由于生产的前提是需要循环队列中有空位，因此需要先调用<code> sem_wait(&amp;ctln-&gt;emptyslot);</code>,同时，为了实现互斥进入共享内存，则需要用到<code> sem_wait(&amp;ctln-&gt;sem_mutex);</code>。</li>
+<li>当成功进入之后，则再判断目前生产的产品数是否达到所需，若达到了则调用<code>sem_post(&amp;ctln-&gt;emptyslot);</code>释放空位。若没有，则将item_num++表示生产了一个产品，然后移动循环队列的尾指针<code>ctln-&gt;enqueue = (ctln-&gt;enqueue + 1) % ctln-&gt;BUFFER_SIZE;</code>，然后通过偏移量访问产品数据，写入产品的编号以及所被生产的线程号。</li>
+<li>若此时已经达到所需生产数目，则将END_FLAG置为1表示可以结束生产。</li>
+<li>最后调用<code>sem_post(&amp;ctln-&gt;stock);</code>表示循环队列中多了一个产品，再调用<code> sem_post(&amp;ctln-&gt;sem_mutex);</code>以便其他线程可以进入共享内存。</li>
+</ul>
+<h5 id="alg-18-8-syn-pc-consumer-6-c"><a href="#alg-18-8-syn-pc-consumer-6-c" class="headerlink" title="alg.18-8-syn-pc-consumer-6.c"></a>alg.18-8-syn-pc-consumer-6.c</h5><ul>
+<li>此程序为消费者程序，主函数实现的是根据传入的参数得到共享内存的ID，从而通过shmat()能够访问共享内存。接着通过pthread_create()生成消费者线程。最后等到消费者线程均结束之后，断开与共享内存的连接。</li>
+<li>消费者线程函数实现的是取出共享内存中的循环队列中的一个产品。</li>
+<li>当目前已消费的产品数目小于总数目或END_FLAG未被置1时，尝试进入共享内存。首先需要先确保循环队列中有产品，故需要调用<code>sem_wait(&amp;ctln-&gt;stock); </code>然后为了互斥地进入共享内存，再调用<code>sem_wait(&amp;ctln-&gt;sem_mutex);</code>。</li>
+<li>进入共享内存之后，再次判断目前已消费的产品数目是否小于总数目，若不是则调用<code>sem_post(&amp;ctln-&gt;stock);</code>，否则移动队首指针表示出队，然后输出该产品的编号以及生产它的线程号，然后调用<code>sem_post(&amp;ctln-&gt;emptyslot);</code>表明多了一个空位以便生产者线程可以进入。</li>
+<li>最后调用<code>sem_post(&amp;ctln-&gt;sem_mutex);</code>以便其他线程可以进入共享内存。</li>
+</ul>
+<h5 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h5><p><img src="https://pic.gksec.com/2021/05/29/63f61be4663fc/13.png" alt="13.png"></p>
+<ul>
+<li>输入了循环队列大小为4，所需生产产品数目为8，生产者数目为2，消费者数目为3</li>
+<li>可以看到，首先输出了控制台进程以及由其生成的生产者进程和消费者进程的进程号。</li>
+<li>接着，线程号为7521和7522的两个生产者线程分别生产了产品1和产2，此时缓冲区中有2个产品。</li>
+<li>接着，线程号为7523和7524的两个消费者线程分别从中取出了产品1和产品2，此时缓冲区产品数又变为0，enqueue指针和dequeue指针均等于2。</li>
+<li>然后线程号为7521的生产者线程生产了产品3，紧接着便被线程号为7525的消费者线程取出。</li>
+<li>后面的分析同理，直到生产产品数到达所需且均被取出，则整个程序结束。</li>
+</ul>
+<h3 id="alg-18-9-pthread-cond-wait-c"><a href="#alg-18-9-pthread-cond-wait-c" class="headerlink" title="alg.18-9-pthread-cond-wait.c"></a>alg.18-9-pthread-cond-wait.c</h3><h4 id="原理性解释-6"><a href="#原理性解释-6" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
+<li>此程序是通过<strong>条件变量</strong>来实现两个线程对一个变量分别进行递增和递减的操作同步，保证该变量始终大于0。</li>
+<li>与互斥锁不同，条件变量是用来等待而不是用来上锁的。条件变量用来自动阻塞一个线程，直到某特殊情况发生为止。条件变量使我们可以睡眠等待某种条件出现。</li>
+<li>条件变量是利用线程间共享的全局变量进行同步的一种机制，<br>主要包括两个动作：<br>一个线程等待”条件变量的条件成立”而挂起；另一个线程使”条件成立”（给出条件成立信号）。</li>
+<li>条件变量的类型为pthread_cond_t，需要与互斥锁搭配使用，相关的函数如下：<ul>
+<li>int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *cond_attr)：使用 cond_attr 指定的属性初始化条件变量 cond，当 cond_attr 为 NULL 时，使用缺省的属性</li>
+<li>int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)：阻塞该线程直到条件成立</li>
+<li>int pthread_cond_signal(pthread_cond_t *cond)：发出条件成立信号，唤醒阻塞的线程</li>
+<li>int pthread_cond_destroy(pthread_cond_t *cond)：销毁一个条件变量，释放它拥有的资源。进入 pthread_cond_destroy 之前，必须没有在该条件变量上等待的线程。否则返回EBUSY</li>
+</ul>
+</li>
+</ul>
+<h4 id="细节性解释-6"><a href="#细节性解释-6" class="headerlink" title="细节性解释"></a>细节性解释</h4><ul>
+<li>首先定义并初始化互斥锁mutex和条件变量cond，主函数实现的是创建两个线程，分别递增和递减全局变量count</li>
+<li>线程函数decrement()实现的是对count进行递减操作，通过一个条件变量，当count小于等于0时，会通过<code> pthread_cond_wait(&amp;cond, &amp;mutex)</code>堵塞直到count大于0，才会继续执行递减操作。</li>
+<li>线程函数increment()实现的是对count进行递增操作，当count大于0的时候会通过<code>pthread_cond_signal(&amp;cond)</code>唤醒阻塞的递减线程。</li>
+<li>运行结果如下：<br><img src="https://pic.gksec.com/2021/05/29/a203a60459e07/14.png" alt="14.png"></li>
+<li>可以看到通过条件变量的控制，保证了count始终大于0</li>
+</ul>
+<h2 id="内容二"><a href="#内容二" class="headerlink" title="内容二"></a>内容二</h2><h3 id="修改思路："><a href="#修改思路：" class="headerlink" title="修改思路："></a>修改思路：</h3><ul>
+<li><p>总共用到了三个信号量，分别为：</p>
+<ul>
+<li>empty_slots：其值范围为0到task_queue_capacity，代表任务队列空位置的数目，用于实现任务队列的同步</li>
+<li>count_mutex：其值为0或1，用于实现count的互斥</li>
+<li>thread_mutex：其值为0或1，用于实现线程队列的互斥</li>
+</ul>
+</li>
+<li><p>empty_slots所用在的地方如下所示：</p>
+</li>
+<li><p>每次添加任务到任务队列之前，先调用<code>sem_wait(&amp;(pool-&gt;empty_slots));</code>，当任务队列没有空位的时候便会阻塞于此。<br><img src="https://pic.gksec.com/2021/05/29/3c5a7ed5a6352/%E9%80%89%E5%8C%BA_021.png" alt="选区_021.png"></p>
+</li>
+<li><p>每次任务结束的时候，会调用<code>sem_post(&amp;(pool-&gt;empty_slots));</code>表示任务队列有新的空位。<br><img src="https://pic.gksec.com/2021/05/29/ac95699f9feaa/%E9%80%89%E5%8C%BA_022.png" alt="选区_022.png"><br>由此实现任务进队出队的同步。</p>
+</li>
+<li><p>count_mutex所用在的地方如下所示：<br><img src="https://pic.gksec.com/2021/05/29/4929c3afc6b19/%E9%80%89%E5%8C%BA_023.png" alt="选区_023.png"></p>
+</li>
+<li><p>实际上类似于一个互斥锁的功能，将count的自增操作实现互斥，避免条件竞争，保证结果的正确性。</p>
+</li>
+<li><p>thread_mutex所用在的地方如下所示：</p>
+</li>
+<li><p>为了避免多个线程枪同一个任务的情况，需要对工作线程获取任务的过程进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/568b25a0778fd/%E9%80%89%E5%8C%BA_024.png" alt="选区_024.png"></p>
+</li>
+<li><p>为保证工作线程下标的正确以及队列的正确，入队需要进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/080cc33bae2c4/%E9%80%89%E5%8C%BA_025.png" alt="选区_025.png"></p>
+</li>
+<li><p>同样的道理，出队也需要进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/3f78eeddfaed7/%E9%80%89%E5%8C%BA_026.png" alt="选区_026.png"></p>
+</li>
+</ul>
+<h3 id="结果分析："><a href="#结果分析：" class="headerlink" title="结果分析："></a>结果分析：</h3><p><img src="https://pic.gksec.com/2021/05/14/928d9dd6f6005/2.png" alt="2.png"></p>
+<ul>
+<li>由于输入了2，故线程池中有两个线程，编号分别为0和1</li>
+<li>任务队列容量输入了4，故一开始只能添加4个任务，然后就提示任务队列已满，正在等待</li>
+<li>然后任务0分配给了线程0，分配之后任务队列不满，因此成功添加了任务4</li>
+<li>任务1分配给了线程1，分配之后任务队列不满，因此成功添加了任务5</li>
+<li>线程0完成任务0之后又依次转去执行任务2和任务4</li>
+<li>线程1完成任务1之后又依次转去执行任务3和5</li>
+<li>最后，所有任务执行完成之后，管理线程结束，工作线程也就随着结束，整个线程池清空。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">HogarHuang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E5%90%8C%E6%AD%A5%E4%BA%92%E6%96%A5/">https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E5%90%8C%E6%AD%A5%E4%BA%92%E6%96%A5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post_share"><div class="social-share" data-image="/images/background.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://fastly.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E7%BA%BF%E7%A8%8B%E8%B0%83%E5%BA%A6/"><img class="prev-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">OS-线程调度</div></div></a></div><div class="next-post pull-right"><a href="/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-Peterson%E7%AE%97%E6%B3%95/"><img class="next-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">OS-Peterson算法</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#LabWeek15-%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A"><span class="toc-number">1.</span> <span class="toc-text">LabWeek15 实验报告</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AE%B9%E4%B8%80"><span class="toc-number">1.1.</span> <span class="toc-text">内容一</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#alg-18-1-syn-fetch-1-2-3-c"><span class="toc-number">1.1.1.</span> <span class="toc-text">alg.18-1-syn-fetch-1,2,3.c</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E6%80%A7%E8%A7%A3%E9%87%8A"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">原理性解释</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E6%80%A7%E8%A7%A3%E9%87%8A"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">细节性解释</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#alg-18-1-syn-fetch-1-c"><span class="toc-number">1.1.1.2.1.</span> <span class="toc-text">alg.18-1-syn-fetch-1.c</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#alg-18-1-syn-fetch-2-c"><span class="toc-number">1.1.1.2.2.</span> <span class="toc-text">alg.18-1-syn-fetch-2.c</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#alg-18-1-syn-fetch-3-c"><span class="toc-number">1.1.1.2.3.</span> <span class="toc-text">alg.18-1-syn-fetch-3.c</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alg-18-2-syn-compare-test-c"><span class="toc-number">1.1.2.</span> <span class="toc-text">alg.18-2-syn-compare-test.c</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E6%80%A7%E8%A7%A3%E9%87%8A-1"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">原理性解释</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E6%80%A7%E8%A7%A3%E9%87%8A-1"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">细节性解释</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alg-18-3-syn-pthread-mutex-c"><span class="toc-number">1.1.3.</span> <span class="toc-text">alg.18-3-syn-pthread-mutex.c</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E6%80%A7%E8%A7%A3%E9%87%8A-2"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">原理性解释</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E6%80%A7%E8%A7%A3%E9%87%8A-2"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">细节性解释</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alg-18-4-syn-pthread-sem-unnamed-c"><span class="toc-number">1.1.4.</span> <span class="toc-text">alg.18-4-syn-pthread-sem-unnamed.c</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E6%80%A7%E8%A7%A3%E9%87%8A-3"><span class="toc-number">1.1.4.1.</span> <span class="toc-text">原理性解释</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E6%80%A7%E8%A7%A3%E9%87%8A-3"><span class="toc-number">1.1.4.2.</span> <span class="toc-text">细节性解释</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alg-18-5-syn-pthread-sem-named-c"><span class="toc-number">1.1.5.</span> <span class="toc-text">alg.18-5-syn-pthread-sem-named.c</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E6%80%A7%E8%A7%A3%E9%87%8A-4"><span class="toc-number">1.1.5.1.</span> <span class="toc-text">原理性解释</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E6%80%A7%E8%A7%A3%E9%87%8A-4"><span class="toc-number">1.1.5.2.</span> <span class="toc-text">细节性解释</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alg-18-6-syn-pc-con-6%EF%BC%8C7%EF%BC%8C8"><span class="toc-number">1.1.6.</span> <span class="toc-text">alg.18-6-syn-pc-con-6，7，8</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E6%80%A7%E8%A7%A3%E9%87%8A-5"><span class="toc-number">1.1.6.1.</span> <span class="toc-text">原理性解释</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E6%80%A7%E8%A7%A3%E9%87%8A-5"><span class="toc-number">1.1.6.2.</span> <span class="toc-text">细节性解释</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#alg-18-6-syn-pc-con-6-h"><span class="toc-number">1.1.6.2.1.</span> <span class="toc-text">alg.18-6-syn-pc-con-6.h</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#alg-18-6-syn-pc-con-6-c"><span class="toc-number">1.1.6.2.2.</span> <span class="toc-text">alg.18-6-syn-pc-con-6.c</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#alg-18-7-syn-pc-producer-6-c"><span class="toc-number">1.1.6.2.3.</span> <span class="toc-text">alg.18-7-syn-pc-producer-6.c</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#alg-18-8-syn-pc-consumer-6-c"><span class="toc-number">1.1.6.2.4.</span> <span class="toc-text">alg.18-8-syn-pc-consumer-6.c</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="toc-number">1.1.6.2.5.</span> <span class="toc-text">运行结果</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alg-18-9-pthread-cond-wait-c"><span class="toc-number">1.1.7.</span> <span class="toc-text">alg.18-9-pthread-cond-wait.c</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E6%80%A7%E8%A7%A3%E9%87%8A-6"><span class="toc-number">1.1.7.1.</span> <span class="toc-text">原理性解释</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E6%80%A7%E8%A7%A3%E9%87%8A-6"><span class="toc-number">1.1.7.2.</span> <span class="toc-text">细节性解释</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AE%B9%E4%BA%8C"><span class="toc-number">1.2.</span> <span class="toc-text">内容二</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E6%80%9D%E8%B7%AF%EF%BC%9A"><span class="toc-number">1.2.1.</span> <span class="toc-text">修改思路：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90%EF%BC%9A"><span class="toc-number">1.2.2.</span> <span class="toc-text">结果分析：</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div></div></div></div></main><footer id="footer" style="background: #FFFFFF"><div id="footer-wrap"><div class="copyright">&copy;2022 By HogarHuang</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/chenxz21/hexo-theme-bcxm">Bcxm</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://fastly.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><script type="text/javascript" src="https://fastly.jsdelivr.net/npm/leancloud-storage@4.10.0/dist/av-min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

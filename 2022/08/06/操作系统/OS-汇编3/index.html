@@ -1,0 +1,451 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>OS-汇编相关-3</title><meta name="author" content="HogarHuang"><meta name="copyright" content="HogarHuang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="实验三报告一、实验目的 学习无符号和有符号数的基本运算操作 学习移位指令，了解其与乘除法之间的联系 学习对BCD格式数值的运算 操作 学习布尔逻辑操作 学习IA-32字符串操作指令  二、技术日志Chapter08知识点 整数运算   加法  指令格式  1add source,destination   操作数可以为8位、16位、32位，分别对应于addb，addw，addl 若操作数不是32位">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-汇编相关-3">
+<meta property="og:url" content="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%963/index.html">
+<meta property="og:site_name" content="Hogar&#39;s Blog">
+<meta property="og:description" content="实验三报告一、实验目的 学习无符号和有符号数的基本运算操作 学习移位指令，了解其与乘除法之间的联系 学习对BCD格式数值的运算 操作 学习布尔逻辑操作 学习IA-32字符串操作指令  二、技术日志Chapter08知识点 整数运算   加法  指令格式  1add source,destination   操作数可以为8位、16位、32位，分别对应于addb，addw，addl 若操作数不是32位">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://huanghj78.github.io/images/background.jpg">
+<meta property="article:published_time" content="2022-08-06T13:38:27.980Z">
+<meta property="article:modified_time" content="2022-08-06T13:52:36.278Z">
+<meta property="article:author" content="HogarHuang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huanghj78.github.io/images/background.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%963/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: HogarHuang","link":"Link: ","source":"Source: Hogar's Blog","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'OS-汇编相关-3',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-08-06 21:52:36'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hogar's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">OS-汇编相关-3</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">Created</span><time datetime="2022-08-06T13:38:27.980Z" title="Created 2022-08-06 21:38:27">2022-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="meta-secondline"></div></div></div><article class="post-content" id="article-container"><h1 id="实验三报告"><a href="#实验三报告" class="headerlink" title="实验三报告"></a>实验三报告</h1><h2 id="一、实验目的"><a href="#一、实验目的" class="headerlink" title="一、实验目的"></a>一、实验目的</h2><ol>
+<li>学习无符号和有符号数的基本运算操作</li>
+<li>学习移位指令，了解其与乘除法之间的联系</li>
+<li>学习对BCD格式数值的运算 操作</li>
+<li>学习布尔逻辑操作</li>
+<li>学习IA-32字符串操作指令</li>
+</ol>
+<h2 id="二、技术日志"><a href="#二、技术日志" class="headerlink" title="二、技术日志"></a>二、技术日志</h2><h3 id="Chapter08"><a href="#Chapter08" class="headerlink" title="Chapter08"></a>Chapter08</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><ol>
+<li>整数运算</li>
+</ol>
+<ul>
+<li><p>加法</p>
+<ul>
+<li>指令格式</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add source,destination</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>操作数可以为8位、16位、32位，分别对应于addb，addw，addl</li>
+<li>若操作数不是32位，需先使用零填充目标寄存器</li>
+<li>通常需结合XOR指令和MOVSX指令</li>
+<li>可使用于无符号数和有符号数</li>
+<li>进位和溢出：带符号数：溢出标志位置1；无符号数：进位标志位置1.</li>
+<li>ADC指令：可以执行两个无符号或带符号数的加法，并且把前一个ADD指令产生的进位标志的值包含在其中。</li>
+</ul>
+</li>
+<li><p>减法</p>
+<ul>
+<li>指令格式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sub source,destination</span><br></pre></td></tr></table></figure>
+
+具体操作为：从destination中减去source并将结果存放在destination中。</li>
+<li>进位和溢出<ul>
+<li>无符号数减法，小数减去大数进位位置1，</li>
+<li>带符号数减法，结果超过界限溢出位置1.</li>
+</ul>
+</li>
+<li>SBB指令：在多字节的减法操作中利用进位和溢出标志实现跨越数据边界的借位特性，即考虑source的借位，再进行减法。</li>
+</ul>
+</li>
+<li><p>递增和递减</p>
+<ul>
+<li>指令格式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dec destination </span><br><span class="line">inc destination</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>主要用于无符号整数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>乘法</p>
+<ul>
+<li>无符号：使用MUL指令<ul>
+<li>指令格式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mul source</span><br></pre></td></tr></table></figure></li>
+<li>目标位置为EAX寄存器的某种形式</li>
+<li>MUL指令的目标位置必须是源操作数的两倍长度</li>
+<li>16位源操作数：结果存于DX：AX寄存器</li>
+<li>32位操作数：结果存于EDX：EAX</li>
+</ul>
+</li>
+<li>带符号数：使用IMUL指令<ul>
+<li>指令格式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">imul source</span><br><span class="line">或</span><br><span class="line">imul source, destination</span><br><span class="line">或</span><br><span class="line">imul multiper，source，destination</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>检查溢出<ul>
+<li>当使用带符号数和IMUL指令时，需要检查结果中的溢出</li>
+<li>通常是利用JO指令</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>除法</p>
+<ul>
+<li>无符号：使用DIV指令<ul>
+<li>指令格式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">div divisor</span><br></pre></td></tr></table></figure></li>
+<li>divisor，即除数而被除数需存储在AX或DX：AX或EDX：EAX寄存器中。</li>
+<li>除法的结果是两个单独的数字：商和余数，均存储在被除数使用的寄存器中。</li>
+</ul>
+</li>
+<li>带符号：使用IDIV指令</li>
+<li>指令格式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">idiv divisor</span><br></pre></td></tr></table></figure></li>
+<li>检查除法错误<ul>
+<li>需要留意除以零或商或余数溢出目标寄存器的情况。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ol start="2">
+<li>移位指令</li>
+</ol>
+<ul>
+<li>移位乘法<ul>
+<li>SAL：向左算术移位；SHL：向左逻辑移位</li>
+<li>两者执行相同的操作</li>
+<li>指令格式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sal destination</span><br><span class="line">sal %cl, destination</span><br><span class="line">sal shifter, destination</span><br></pre></td></tr></table></figure></li>
+<li>移位造成的空位用0填充，超出的数据首先被放在进位标志位中，然后在下一次移位操作中被丢弃。</li>
+</ul>
+</li>
+<li>移位除法<ul>
+<li>SAR：向右算术移位；SHR：向右逻辑移位</li>
+<li>需要注意符号：无符号整数右移产生的空位被0填充，而带符号数若为负数空位被1填充才能保证结果的正确，故对于带符号数只能使用SAR</li>
+</ul>
+</li>
+<li>循环移位<ul>
+<li>ROL、ROR、RCL、RCR</li>
+<li>溢出位被存放回数值的另一端</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>十进制运算</li>
+</ol>
+<ul>
+<li>不打包BCD运算<ul>
+<li>AAA、AAS、AAM、AAD</li>
+<li>隐含操作数为AL寄存器，这些指令假设前一个操作的结果存放在AL寄存器中，并把这个值转换为不打包的BCD格式</li>
+</ul>
+</li>
+<li>打包BCD的运算<ul>
+<li>DAA、DAS</li>
+<li>隐含操作数同样为AL寄存器，使用位于AL寄存器中的隐含操作数，并把转换结果存放在AL寄存器中，把进位位存放在AH寄存器和辅助进位标志位中。</li>
+</ul>
+</li>
+</ul>
+<ol start="4">
+<li>逻辑操作</li>
+</ol>
+<ul>
+<li>布尔逻辑<ul>
+<li>AND、NOT、OR、XOR</li>
+<li>指令格式:<ul>
+<li>AND、OR、XOR具有相同的格式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and source,destination</span><br></pre></td></tr></table></figure></li>
+<li>NOT使用单一操作数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>位测试<ul>
+<li>TEST指令：用于检查EFLAGS寄存器中的标志</li>
+</ul>
+</li>
+</ul>
+<h4 id="验证addtest1"><a href="#验证addtest1" class="headerlink" title="验证addtest1"></a>验证addtest1</h4><p><img src="https://i.loli.net/2021/03/12/sazwHuyeM5nP897.png" alt="addtest1_1.png"><br>在执行指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addb $10, %al</span><br></pre></td></tr></table></figure>
+
+<p>之前，%eax中的值为20，执行之后加上了10变为了30<br><img src="https://i.loli.net/2021/03/12/OafySJieD6kWGUc.png" alt="addtest1_2.png"><br>执行全部加法指令之后各个目标寄存器的值如上，</p>
+<ul>
+<li>指令addl data, %eax使得data对应内存中的值与eax寄存器的值相加，data中为40，而经过指令addb $10,%al后，%eax中的值为30，故最后%eax的值为70</li>
+<li>addw %cx,%bx使得cx和bx的值相加，而一开始bx为0，cx通过指令movw $100,%cx的执行之后值为100，故最后%ebx的值为100</li>
+<li>通过指令movw $100, %cx后%ecx的值为100</li>
+<li>执行指令movl $100, %edx之后%edx的值为100，再执行指令addl %edx, %edx后最后%edx的值为200</li>
+<li>执行指令addl %eax, data后，由于%eax的值为70，data为40，故最后data中的值为110</li>
+</ul>
+<h4 id="验证addtest2"><a href="#验证addtest2" class="headerlink" title="验证addtest2"></a>验证addtest2</h4><p><img src="https://i.loli.net/2021/03/12/3eopNDWY1QBdR25.png" alt="addtest2.png"><br>执行所有add指令后通过查看各个寄存器的值可证明add指令对于带符号整数的加法同样适用</p>
+<h4 id="验证addtest3"><a href="#验证addtest3" class="headerlink" title="验证addtest3"></a>验证addtest3</h4><p><img src="https://i.loli.net/2021/03/12/mSoKfx43WIlyV2N.png" alt="aaddtest3.png"><br>一开始代码为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movb $190,%bl</span><br><span class="line">movb $100,%al</span><br></pre></td></tr></table></figure>
+
+<p>进行加法运算之后超出了%al寄存器所能容纳的最大值255，由此进位标志置1，故执行了jc over指令，结果代码被置为0<br>当代码改为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movb $190,%bl</span><br><span class="line">movb $10,%al</span><br></pre></td></tr></table></figure>
+
+<p>进行加法运算之后不会超出范围，故不会执行jc over指令，加法的结果被置为结果代码，故最后输出为200</p>
+<h4 id="验证addtest4"><a href="#验证addtest4" class="headerlink" title="验证addtest4"></a>验证addtest4</h4><p><img src="https://i.loli.net/2021/03/12/w29KaOubCfHsJIc.png" alt="addtest4.png"><br>执行一开始所给的代码，输出结果为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The result is 0</span><br></pre></td></tr></table></figure>
+
+<p>这是由于两个负数相加之后结果超出了负值界限，发生了溢出，指令jo over被执行，将0作为了输出参数<br>当代码中的两个负数改小以至不会发生溢出之后，即可输出了正确的加法结果<br>因此，检测带符号整数的加法是否溢出要利用JO指令</p>
+<h4 id="验证adctest"><a href="#验证adctest" class="headerlink" title="验证adctest"></a>验证adctest</h4><p><img src="https://i.loli.net/2021/03/12/McZF1DgpmKA2yBl.png" alt="adctest1.png"><br>执行加法操作之前寄存器的值如上<br><img src="https://i.loli.net/2021/03/12/jspHCrKM2UJ5qmg.png" alt="adctest2.png"><br>执行加法操作之后，可看出结果被存放在ECX：EDX寄存器中<br><img src="https://i.loli.net/2021/03/12/gneWPs8uy7NZf9X.png" alt="adctest3.png"><br><img src="https://i.loli.net/2021/03/12/2n1jGbTVi4RlHSU.png" alt="adctest4.png"><br>当data1和data2的值取反，可见输出的结果也为正确的</p>
+<h4 id="验证subtest1"><a href="#验证subtest1" class="headerlink" title="验证subtest1"></a>验证subtest1</h4><p><img src="https://i.loli.net/2021/03/12/UpsPJS8V1E3RYx9.png" alt="subtest1.png"><br>执行指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movb $20, %al</span><br><span class="line">subb $10, %al</span><br></pre></td></tr></table></figure>
+
+<p>%eax中的值为10，然后执行了指令subl data, %eax，由于data中的值为40，故%eax的值为-30，最后执行指令subl %eax, data，40-（-30),故最后data中的值为70</p>
+<h4 id="验证subtest2"><a href="#验证subtest2" class="headerlink" title="验证subtest2"></a>验证subtest2</h4><p><img src="https://i.loli.net/2021/03/12/qOvmU9gH571LuMy.png" alt="subtest2.png"><br>对于无符号整数，做减法操作结果为负数之后，进位为被置1，故结果代码为0，但通过查看%ebx寄存器的值会发现，正确的结果-3被存于其中，</p>
+<h4 id="验证subtest3"><a href="#验证subtest3" class="headerlink" title="验证subtest3"></a>验证subtest3</h4><p><img src="https://i.loli.net/2021/03/12/38rNmSdLHk2eW5K.png" alt="subtest3.png"><br>运行原代码的时候，一个负数减去一个整数，由于最后结果溢出了，故执行jo指令，跳转到了over处，最后输出为0。将存入%eax的值取反之后，结果不会溢出，jo指令不执行，故最后输出正确结果。</p>
+<h4 id="验证sbbtest"><a href="#验证sbbtest" class="headerlink" title="验证sbbtest"></a>验证sbbtest</h4><p><img src="https://i.loli.net/2021/03/12/GYe5nhvlabgfkoj.png" alt="sbbtest.png"><br>此程序的操作数为多字节，故需要用sbb指令实现多字节之间的借位，运行程序之后可看出得到了正确的结果。</p>
+<h4 id="验证multest"><a href="#验证multest" class="headerlink" title="验证multest"></a>验证multest</h4><p><img src="https://i.loli.net/2021/03/12/SU6rEcPNuG2JV8H.png" alt="multest.png"><br>此程序执行了两个32位无符号整数的乘法，故结果存放在EDX：EAX寄存器中。执行完乘法指令之后，通过查看EAX、EDX寄存器以及result对应内存中的值可验证mul指令的正确性。</p>
+<h4 id="验证imultest"><a href="#验证imultest" class="headerlink" title="验证imultest"></a>验证imultest</h4><p><img src="https://i.loli.net/2021/03/12/G67hCk54KljxS2H.png" alt="imultest.png"><br>执行完IMUL指令之后，通过查看寄存器中可知EAX寄存器中的值为EDX的值和立即数2相乘的结果，ECX寄存器中的值为EBX中的值和立即数-35相乘的结果。</p>
+<h4 id="验证imultest2"><a href="#验证imultest2" class="headerlink" title="验证imultest2"></a>验证imultest2</h4><p><img src="https://i.loli.net/2021/03/12/WZQxNlqgw5B4AO6.png" alt="imultest2.2.png"><br><img src="https://i.loli.net/2021/03/12/xYOoFGNTDCVBbZK.png" alt="imultest2.png"><br>原代码中为680乘以100，结果发生了溢出，故执行了jo指令跳转到over处，最后结果代码为1.<br>第二次改为了68乘以100，结果不会溢出，故没有执行jo指令，最后结果代码为0</p>
+<h4 id="验证divtest"><a href="#验证divtest" class="headerlink" title="验证divtest"></a>验证divtest</h4><p><img src="https://i.loli.net/2021/03/12/prbQhN2njH86zJs.png" alt="divtest.png"><br>此程序将一个64位的四字整数放在EDX：EAX寄存器中，然后使用存放在divisor对应的内存中的值作为除数，相除得到的商放在quotient对应的内存中，得到的余数放在remainder对应的内存中。</p>
+<h4 id="验证saltest"><a href="#验证saltest" class="headerlink" title="验证saltest"></a>验证saltest</h4><p><img src="https://i.loli.net/2021/03/12/oSrTZB2IzFhXnui.png" alt="saltest.png"><br>此程序使用了SAL指令的三种格式，使用EBX寄存器保存要移位的值。一开始EBX存放了10，第一条SAL指令使其左移1位，结果为20。第二题SAL指令将其左移2位，故结果为80.第三条SAL指令将其左移两位，故结果为320.value1中的值被左移1位，故结果为50，再左移2位，故最后结果为200</p>
+<h4 id="验证aaatest"><a href="#验证aaatest" class="headerlink" title="验证aaatest"></a>验证aaatest</h4><p><img src="https://i.loli.net/2021/03/14/XfFLvUdamTQCYRt.png" alt="aaatest.png"><br><img src="https://i.loli.net/2021/03/14/PZjNAG1Uqufshk5.png" alt="aaatest2.png"><br>此程序演示了两个多字节不打包的BCD值的加法，在ADC指令之后执行AAA指令将AL寄存器的二进制结果转换为不打包BCD格式，然后把结果存储在sum对应的内存位置。执行第三次ADC指令之后，可以看到AL寄存器中的值为10，即9加1的结果，而再执行aaa指令后，%eax的值变为了256。最后可以看到最终的结果以不打包BCD格式存放在sum对应的内存位置中。</p>
+<h4 id="验证dastest"><a href="#验证dastest" class="headerlink" title="验证dastest"></a>验证dastest</h4><p><img src="https://i.loli.net/2021/03/17/CK1PdOuURgsIMZx.jpg" alt="dastest.png"><br>此程序首先通过MOVB指令将value2中的打包BCD值加载到AL寄存器中，然后利用SBBB指令，令其减去第二个打包的BCD值，此操作会考虑到借位的问题，故然后可用DAS指令调整减法结果，将其转化为打包BCD格式。通过调试程序，查看EAX寄存器的值可看到执行第一个减法操作之后，EAX寄存器中最低一个字节为0x0e，执行DAS指令之后变为了0x08，由于执行的减法为52933-28125&#x3D;24808，故可得知0x08为减法结果的最低两位。</p>
+<h4 id="验证cpuidtest"><a href="#验证cpuidtest" class="headerlink" title="验证cpuidtest"></a>验证cpuidtest</h4><p><img src="https://i.loli.net/2021/03/12/AqeKuYFrdVE4HX3.png" alt="cpuidtest.png"><br>此程序通过利用TEST指令检查EFLAGS寄存器中的ID位以确定处理器是否支持CPUID指令，即让EFLAGS寄存器中的ID位取反，然后测试该位是否确实改变，若可以改变则代表处理器支持CPUID指令</p>
+<h3 id="Chapter10"><a href="#Chapter10" class="headerlink" title="Chapter10"></a>Chapter10</h3><h4 id="知识点-1"><a href="#知识点-1" class="headerlink" title="知识点"></a>知识点</h4><ol>
+<li>传送字符串</li>
+</ol>
+<ul>
+<li>MOVS指令<ul>
+<li>MOVSB、MOVSW‘MOVSL</li>
+<li>隐含源操作数为ESI寄存器，其指向源字符串的内存</li>
+<li>隐含目标操作数为EDI寄存器，其指向字符串要被复制到的目标内存的位置</li>
+<li>两种加载ESI和EDI值的方式<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">movl $output, %edi</span><br><span class="line">或</span><br><span class="line">leal output, %edi</span><br></pre></td></tr></table></figure></li>
+<li>REP前缀<ul>
+<li>重复执行次数由ECX寄存器的值控制</li>
+<li>配合MOVS指令使用，可用于复制字符串</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ol start="2">
+<li>存储和加载字符串</li>
+</ol>
+<ul>
+<li>LODS指令<ul>
+<li>用于把内存中的字符串值传送到EAX寄存器中</li>
+<li>ESI寄存器作为源操作数</li>
+<li>根据DF标志状态递增或递减ESI寄存器</li>
+</ul>
+</li>
+<li>STIS指令<ul>
+<li>用于把内存中的字符串值传送到另外一个内存中</li>
+<li>EDI寄存器作为目的操作数</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>比较字符串</li>
+</ol>
+<ul>
+<li>CMPS指令<ul>
+<li>隐含源操作数为ESI寄存器，其指向源字符串的内存</li>
+<li>隐含目标操作数为EDI寄存器，其指向字符串要被复制到的目标内存的位置</li>
+<li>从源字符串中减去目标字符串，并适当地设置EFLAGS寄存器的标志位</li>
+</ul>
+</li>
+<li>CMPS和REP指令一起使用<ul>
+<li>可以逐个字节地检查字符串以便确定它们是否匹配</li>
+</ul>
+</li>
+<li>字符串不等<ul>
+<li>常用比较方法：字典顺序</li>
+</ul>
+</li>
+</ul>
+<ol start="4">
+<li>扫描字符串</li>
+</ol>
+<ul>
+<li>SCAS指令<ul>
+<li>SCAS指令提供了扫描字符串搜索特定的一个字符或一组字符的方法</li>
+<li>EDI寄存器作为目标操作数</li>
+<li>通常需要与RERE或REPNE指令配合使用</li>
+<li>SCAS指令可以确定零结尾的字符串长度</li>
+</ul>
+</li>
+</ul>
+<h4 id="验证movstest1"><a href="#验证movstest1" class="headerlink" title="验证movstest1"></a>验证movstest1</h4><p><img src="https://i.loli.net/2021/03/12/CMRO8TEfoWgXuh3.png" alt="movstest1.png"><br>此程序首先把value1对应的内存位置存放在ESI寄存器中，把output对应的内存位置存放在EDI寄存器中，单步调试可以看出执行movsb、movsw、movsl传送的字节数量是不同的。</p>
+<h4 id="验证movstest2"><a href="#验证movstest2" class="headerlink" title="验证movstest2"></a>验证movstest2</h4><p><img src="https://i.loli.net/2021/03/13/N3znPsKm42xqcXe.png" alt="movstest2.png"><br>执行三条movs指令之后通过查看内存output的状态可以发现，output位置的字符串从字符串末尾开始填充，但只有四个位置被填充了。其原因在于虽然ESI和EDI寄存器向后计数，但MOVSW和MOVSL指令还是向前的顺序获得内存位置，要解决这一问题需要每条指令使用长度的快进行传送。</p>
+<h4 id="验证movstest3"><a href="#验证movstest3" class="headerlink" title="验证movstest3"></a>验证movstest3</h4><p><img src="https://i.loli.net/2021/03/13/EjzqAmDZrWUB67c.png" alt="movtest3.png"><br>此程序演示了通过利用循环和MOVSL的结合实现大型字符串的复制</p>
+<h4 id="验证reptest1"><a href="#验证reptest1" class="headerlink" title="验证reptest1"></a>验证reptest1</h4><p><img src="https://i.loli.net/2021/03/13/g8ZTwjzn3GQJOhm.png" alt="reptest1.png"><br>由目标字符串的长度可知若执行movsb指令需要传送23次，即rep指令执行movsb指令23次，但从gdb单步调试可看出REP指令仍然只算为一个指令步骤</p>
+<h4 id="验证reptest2"><a href="#验证reptest2" class="headerlink" title="验证reptest2"></a>验证reptest2</h4><p><img src="https://i.loli.net/2021/03/13/bS4FDyRXOAngKmB.png" alt="reptesst2.png"><br>此程序演示了当复制超过字符串边界时，会把一些垃圾值复制进目标内存地址中的情况</p>
+<h4 id="验证reptest3"><a href="#验证reptest3" class="headerlink" title="验证reptest3"></a>验证reptest3</h4><p><img src="https://i.loli.net/2021/03/13/Pxr3imcpZd5qu6C.png" alt="reptest3.png"><br>此程序演示了利用整数除法以及移位指令使得字符串位数与movs指令匹配从而避免复制出垃圾值</p>
+<h4 id="验证reptest4"><a href="#验证reptest4" class="headerlink" title="验证reptest4"></a>验证reptest4</h4><p><img src="https://i.loli.net/2021/03/13/2ZLJktU7yp5GWXz.png" alt="reptest4.png"><br>此程序通过利用STO指令设置DF标志位使得目标字符串按相反的顺序读取，同时，由于把源和目标字符串的末尾位置加载到ESI和EDI寄存器中，故可以看到最后的结果仍是一样的。</p>
+<h4 id="验证stostest1"><a href="#验证stostest1" class="headerlink" title="验证stostest1"></a>验证stostest1</h4><p><img src="https://i.loli.net/2021/03/14/NR9Yyg7K6IxQJt3.png" alt="stostest1.png"><br>可以看到，在执行指令rep sto之前，因为buffer是在.bss段中定义的，所以对应内存中的值都为0，执行之后buffer中的值为0x20，即空格</p>
+<h4 id="验证convert"><a href="#验证convert" class="headerlink" title="验证convert"></a>验证convert</h4><p><img src="https://i.loli.net/2021/03/13/sJz14QFLTUPOkdu.png" alt="convert.png"><br>此程序通过遍历该字符串，利用指令lodsb，每次把字符加载到AL寄存器中，并判断是否为大写，若不是则减去0x20，即转化为大写，然后通过指令stosb存回字符串，从而实现将整个字符串转化为大写</p>
+<h4 id="验证cmpstest1"><a href="#验证cmpstest1" class="headerlink" title="验证cmpstest1"></a>验证cmpstest1</h4><p><img src="https://i.loli.net/2021/03/13/5Vuiebj8U3PnsEQ.png" alt="cmpstest1.2.png"><br><img src="https://i.loli.net/2021/03/14/G69vIad7yWZ3MpF.png" alt="cmpstest1.png"><br>执行原代码之后，运行echo $?查看结果代码可知为0，即两个字符串相等。然后将原代码中一个字符串进行修改，使其不相等，运行之后再次查看结果代码可知变为了1</p>
+<h4 id="验证cmpstest2"><a href="#验证cmpstest2" class="headerlink" title="验证cmpstest2"></a>验证cmpstest2</h4><p><img src="https://i.loli.net/2021/03/14/YZ7aX3IAltq51Ce.png" alt="cmpstest2.png"><br>此程序通过把源和目标字符串的位置加载到ESI和EDI寄存器中，把字符串长度加载到ECX寄存器中，利用REPE CMPSB指令实现逐个字节地比较字符串，知道ECX寄存器为0，即相等，或零标志位被置1，即不相等。<br>运行此程序后，查看结果代码为11，其含义即为从字符串末往前数的第11个字符不相等（从0开始）</p>
+<h4 id="验证strcomp"><a href="#验证strcomp" class="headerlink" title="验证strcomp"></a>验证strcomp</h4><p><img src="https://i.loli.net/2021/03/14/Jc6YTLxIFeCj79o.png" alt="strcomp1.png"><br><img src="https://i.loli.net/2021/03/14/kSnPJxoDWY7qcTy.png" alt="strcomp1.1.png"><br><img src="https://i.loli.net/2021/03/14/msPgqFHM49C8zOK.png" alt="strcomp2.png"><br><img src="https://i.loli.net/2021/03/14/hCJvkDFzd8l7ESm.png" alt="strcomp2.1.png"><br><img src="https://i.loli.net/2021/03/14/LvEQpKdkX7VW8ZC.png" alt="strcomp3.png"><br><img src="https://i.loli.net/2021/03/14/mRXnYEOe8fugcay.png" alt="strcomp3.1.png"><br>此程序通过利用REPE和CMPSB指令实现两个字符串的比较，通过改变字符串string1的值来得到两个字符串相等、大于及小于三种情况对应的结果。</p>
+<h4 id="验证scastest1"><a href="#验证scastest1" class="headerlink" title="验证scastest1"></a>验证scastest1</h4><p><img src="https://i.loli.net/2021/03/14/7bVgF5T4qERr3Wn.png" alt="scastest1.1.png"><br><img src="https://i.loli.net/2021/03/14/QRVWuE1dSITpB2D.png" alt="scastest1.2.png"><br><img src="https://i.loli.net/2021/03/14/p5vNHVRTK9C6ozh.png" alt="scastest1.3.png"><br>此程序将要扫描的字符串的位置加载到EDI寄存器中，使用LODSSB指令把要搜索的字符加载到AL寄存器中，然后把字符串的长度存放在ECX寄存器中，最后使用REPNE SCASB指令对字符串进行扫描搜索目标字符，若找得到则将ECX寄存器中的值减去字符串的长度，再使用指令NEG取反得到该字符在字符串中的位置（从1开始），最后将该值加载到EBX寄存器中作为结果代码可以输出查看。若找不到则跳转到notfound位置，最后的结果代码则为0.</p>
+<h4 id="验证scastest2"><a href="#验证scastest2" class="headerlink" title="验证scastest2"></a>验证scastest2</h4><p><img src="https://i.loli.net/2021/03/14/6DOmxljiFL8PbCu.png" alt="scastest2.1.png"><br><img src="https://i.loli.net/2021/03/14/8THQ4tr9z3ASUKq.png" alt="scastest2.png"><br>此程序演示了SCASL指令使用不当造成的错误，可以看到，要搜索的子字符串实际上是存在于字符串string1中的，但是由于SCASL指令的扫描是每次递增4.从而无法刚好使得”test”刚好一次性被扫描到，从而出现了误判</p>
+<h4 id="验证strsize"><a href="#验证strsize" class="headerlink" title="验证strsize"></a>验证strsize</h4><p><img src="https://i.loli.net/2021/03/14/PliEY6CdTu1HJ8B.png" alt="strsize.png"><br>此程序通过利用SCASB指令搜索字符串结束符’\0’而实现计算目标字符串的长度</p>
+<h2 id="三、遇到的问题及解决方案"><a href="#三、遇到的问题及解决方案" class="headerlink" title="三、遇到的问题及解决方案"></a>三、遇到的问题及解决方案</h2><ol>
+<li>在验证adctest.s时，无法使用gdb对程序进行单步调试，step指令直接让程序跑完，后来发现是源代码中少了nop指令，补充上nop指令后即可<br><img src="https://i.loli.net/2021/03/12/c4mFZA3J6gxDCpU.png" alt="adctest_wrong.png"></li>
+<li>在验证aaatest.s时，检查%eax寄存器的值发现与课本所展示的不一致，后来发现是因为%eax寄存器本身有垃圾值<br><img src="https://i.loli.net/2021/03/14/5k7cM82OdRoPgGD.png" alt="aatest_wrong.png"><br>故在程序开始增加指令</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xor %eax, %eax</span><br></pre></td></tr></table></figure>
+
+<p>将%eax寄存器的值先置零即可<br><img src="https://i.loli.net/2021/03/14/4e6WQluEtDKgz5M.png" alt="aatest_correct.png"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">HogarHuang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%963/">https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%963/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post_share"><div class="social-share" data-image="/images/background.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://fastly.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B1%87%E7%BC%961/"><img class="prev-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">OS-汇编相关-1</div></div></a></div><div class="next-post pull-right"><a href="/2022/08/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/Implementation%20of%20PRIM%20Algorithm%20Using%20binary%20min-Heap/"><img class="next-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">数据结构 - Implementation of PRIM Algorithm Using binary min-Heap</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E4%B8%89%E6%8A%A5%E5%91%8A"><span class="toc-number">1.</span> <span class="toc-text">实验三报告</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%9E%E9%AA%8C%E7%9B%AE%E7%9A%84"><span class="toc-number">1.1.</span> <span class="toc-text">一、实验目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%8A%80%E6%9C%AF%E6%97%A5%E5%BF%97"><span class="toc-number">1.2.</span> <span class="toc-text">二、技术日志</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Chapter08"><span class="toc-number">1.2.1.</span> <span class="toc-text">Chapter08</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81addtest1"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">验证addtest1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81addtest2"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">验证addtest2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81addtest3"><span class="toc-number">1.2.1.4.</span> <span class="toc-text">验证addtest3</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81addtest4"><span class="toc-number">1.2.1.5.</span> <span class="toc-text">验证addtest4</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81adctest"><span class="toc-number">1.2.1.6.</span> <span class="toc-text">验证adctest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81subtest1"><span class="toc-number">1.2.1.7.</span> <span class="toc-text">验证subtest1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81subtest2"><span class="toc-number">1.2.1.8.</span> <span class="toc-text">验证subtest2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81subtest3"><span class="toc-number">1.2.1.9.</span> <span class="toc-text">验证subtest3</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81sbbtest"><span class="toc-number">1.2.1.10.</span> <span class="toc-text">验证sbbtest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81multest"><span class="toc-number">1.2.1.11.</span> <span class="toc-text">验证multest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81imultest"><span class="toc-number">1.2.1.12.</span> <span class="toc-text">验证imultest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81imultest2"><span class="toc-number">1.2.1.13.</span> <span class="toc-text">验证imultest2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81divtest"><span class="toc-number">1.2.1.14.</span> <span class="toc-text">验证divtest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81saltest"><span class="toc-number">1.2.1.15.</span> <span class="toc-text">验证saltest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81aaatest"><span class="toc-number">1.2.1.16.</span> <span class="toc-text">验证aaatest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81dastest"><span class="toc-number">1.2.1.17.</span> <span class="toc-text">验证dastest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81cpuidtest"><span class="toc-number">1.2.1.18.</span> <span class="toc-text">验证cpuidtest</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Chapter10"><span class="toc-number">1.2.2.</span> <span class="toc-text">Chapter10</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9-1"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81movstest1"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">验证movstest1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81movstest2"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">验证movstest2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81movstest3"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">验证movstest3</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81reptest1"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">验证reptest1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81reptest2"><span class="toc-number">1.2.2.6.</span> <span class="toc-text">验证reptest2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81reptest3"><span class="toc-number">1.2.2.7.</span> <span class="toc-text">验证reptest3</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81reptest4"><span class="toc-number">1.2.2.8.</span> <span class="toc-text">验证reptest4</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81stostest1"><span class="toc-number">1.2.2.9.</span> <span class="toc-text">验证stostest1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81convert"><span class="toc-number">1.2.2.10.</span> <span class="toc-text">验证convert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81cmpstest1"><span class="toc-number">1.2.2.11.</span> <span class="toc-text">验证cmpstest1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81cmpstest2"><span class="toc-number">1.2.2.12.</span> <span class="toc-text">验证cmpstest2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81strcomp"><span class="toc-number">1.2.2.13.</span> <span class="toc-text">验证strcomp</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81scastest1"><span class="toc-number">1.2.2.14.</span> <span class="toc-text">验证scastest1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81scastest2"><span class="toc-number">1.2.2.15.</span> <span class="toc-text">验证scastest2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81strsize"><span class="toc-number">1.2.2.16.</span> <span class="toc-text">验证strsize</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.3.</span> <span class="toc-text">三、遇到的问题及解决方案</span></a></li></ol></li></ol></div></div><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div></div></div></div></main><footer id="footer" style="background: #FFFFFF"><div id="footer-wrap"><div class="copyright">&copy;2022 By HogarHuang</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/chenxz21/hexo-theme-bcxm">Bcxm</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://fastly.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><script type="text/javascript" src="https://fastly.jsdelivr.net/npm/leancloud-storage@4.10.0/dist/av-min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

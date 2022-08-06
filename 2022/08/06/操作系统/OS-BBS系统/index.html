@@ -1,0 +1,459 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>OS-BBS系统</title><meta name="author" content="HogarHuang"><meta name="copyright" content="HogarHuang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="实验八报告代码分析原理性解释 此实验是利用进程间通信的两种方式————管道和套接字来实现一个BBS系统。 大致的实现结构如下：  alg.11-5-socket-server-BBS-3-nickname.c运行之后是作为一个服务器的界面，而alg.11-4-socket-connector-BBS-2.c运行之后是作为一个客户端，可以连接到BBS服务器，因此便是多个connector连接到同一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-BBS系统">
+<meta property="og:url" content="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-BBS%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="Hogar&#39;s Blog">
+<meta property="og:description" content="实验八报告代码分析原理性解释 此实验是利用进程间通信的两种方式————管道和套接字来实现一个BBS系统。 大致的实现结构如下：  alg.11-5-socket-server-BBS-3-nickname.c运行之后是作为一个服务器的界面，而alg.11-4-socket-connector-BBS-2.c运行之后是作为一个客户端，可以连接到BBS服务器，因此便是多个connector连接到同一个">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://huanghj78.github.io/images/background.jpg">
+<meta property="article:published_time" content="2022-08-06T15:09:29.736Z">
+<meta property="article:modified_time" content="2022-08-06T15:09:50.067Z">
+<meta property="article:author" content="HogarHuang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://huanghj78.github.io/images/background.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-BBS%E7%B3%BB%E7%BB%9F/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: HogarHuang","link":"Link: ","source":"Source: Hogar's Blog","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://fastly.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'OS-BBS系统',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-08-06 23:09:50'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hogar's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">OS-BBS系统</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">Created</span><time datetime="2022-08-06T15:09:29.736Z" title="Created 2022-08-06 23:09:29">2022-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="meta-secondline"></div></div></div><article class="post-content" id="article-container"><h1 id="实验八报告"><a href="#实验八报告" class="headerlink" title="实验八报告"></a>实验八报告</h1><h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><h3 id="原理性解释"><a href="#原理性解释" class="headerlink" title="原理性解释"></a>原理性解释</h3><ul>
+<li>此实验是利用进程间通信的两种方式————管道和套接字来实现一个BBS系统。</li>
+<li>大致的实现结构如下：</li>
+<li><img src="https://pic.gksec.com/2021/04/15/d756accdaeb23/1.png" alt="1.png"></li>
+<li><strong>alg.11-5-socket-server-BBS-3-nickname.c</strong>运行之后是作为一个服务器的界面，而<strong>alg.11-4-socket-connector-BBS-2.c</strong>运行之后是作为一个客户端，可以连接到BBS服务器，因此便是多个connector连接到同一个BBS服务器上实现彼此之间的通信。connector和BBS服务器可以运行在不同的host上，因此他们之间数据的传递是利用<strong>socket</strong>方法。而<strong>alg.11-4-socket-input-2.c</strong>则是作为BBS服务器或connector的输入窗口，就像是微信聊天窗口和聊天界面之间的关系，键盘输入到input进程，input进程再将从键盘接收到的信息传送给与之对应的BBS服务器或connector，实现对应的方法就是通过<strong>命名管道</strong>，因此不同的input就需要不同的管道，即不同的文件名。然后BBS服务器或connector收到键盘输入的消息之后便可通过socket实现跨host的传送，从而便实现了整个BBS系统。</li>
+</ul>
+<h3 id="细节性解释"><a href="#细节性解释" class="headerlink" title="细节性解释"></a>细节性解释</h3><h4 id="alg-11-3-socket-input-2-c"><a href="#alg-11-3-socket-input-2-c" class="headerlink" title="alg.11-3-socket-input-2.c"></a>alg.11-3-socket-input-2.c</h4><ul>
+<li>此程序作为输入终端，负责将从键盘输入的信息通过命名管道发送给另外一个进程————BBS服务器或connector</li>
+<li>涉及到的系统调用主要是与命名管道相关的一些函数：<ul>
+<li>int access(const char* pathname, int mode)<ul>
+<li>pathname：文件的路径名+文件名</li>
+<li>mode：指定access的作用<ul>
+<li>F_OK 值为0，判断文件是否存在</li>
+<li>X_OK 值为1，判断对文件是可执行权限</li>
+<li>W_OK 值为2，判断对文件是否有写权限</li>
+<li>R_OK 值为4，判断对文件是否有读权限</li>
+</ul>
+</li>
+<li>返回值：成功为0，失败为-1</li>
+</ul>
+</li>
+<li>int mkfifo(const char * pathname,mode_t mode)<ul>
+<li>功能为：依参数pathname建立特殊FIFO文件，该文件必须不存在，而参数mode为该文件的权限</li>
+<li>pathname：文件名</li>
+<li>mode：该文件的权限</li>
+<li>返回值：成功为0，失败为-1</li>
+</ul>
+</li>
+<li>int open(const char *pathname, int oflag, … )<ul>
+<li>打开由mkfifo()函数创建的FIFO文件，即打开创建好的命名管道</li>
+<li>pathname：FIFO文件名</li>
+<li>oflag：<ul>
+<li>O_RDONLY：仅可读</li>
+<li>O_WRONLY：仅可写</li>
+<li>O_RDWR：可读可写</li>
+<li>NONBLOCK：非阻塞（默认为阻塞状态）</li>
+</ul>
+</li>
+<li>返回值：成功则返回一个文件描述符，失败为-1</li>
+</ul>
+</li>
+<li>int fcntl(int fd, int cmd, long arg)<ul>
+<li>功能为：针对(文件)描述符提供控制</li>
+<li>fd：文件描述符</li>
+<li>cmd：控制操作，几种主要的取值如下<ul>
+<li>F_GETFL：取得fd的文件状态标志，arg被忽略</li>
+<li>F_SETFL：fd描述符状态标志设置为arg</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>int write(int fd, const void *buf, size_t count)<ul>
+<li>作用为：将buf指向的内容写入向fd对应的文件中</li>
+<li>fd：文件描述符</li>
+<li>buf：存放要写入的数据的缓冲区首地址</li>
+<li>count：想要写入的字节数</li>
+<li>返回值：成功则返回写入的字节数，失败为-1</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>代码解释：</li>
+<li><img src="https://pic.gksec.com/2021/04/15/47d6bcd37d010/in1.png" alt="in1.png"></li>
+<li>前面一部分显示宏定义了一个消息的大小BUFFEER_SIZE，然后读取传入main函数的文件名参数，如果通过调用access()函数，检测其不存在，则会调用mkfifo()函数，利用该文件名创建一个命名管道。</li>
+<li><img src="https://pic.gksec.com/2021/04/15/8d712eb8a1c5c/in2.png" alt="in2.png"></li>
+<li>接着第二部分是先通过open()函数以可读可写的方式打开该命名管道，由于没有传入NONBLOCK参数，故为默认的阻塞状态。</li>
+<li>然后若打开成功会返回文件描述符fdw，再利用fctl()函数，通过参数F_GETFL获取fdw的状态，然后再一次调用fctl()函数，通过参数F_SETFL，将命名管道设置为nonblocking</li>
+<li>设置完毕之后命名管道便可以使用了，通过一个死循环不断读取键盘的输入存放在write_buf中，然后剔除’\n’</li>
+<li>接着通过调用write()函数，将write_buf中的消息写入fdw对应的管道中</li>
+</ul>
+<h4 id="alg-11-4-socket-connector-BBS-2-c"><a href="#alg-11-4-socket-connector-BBS-2-c" class="headerlink" title="alg.11-4-socket-connector-BBS-2.c"></a>alg.11-4-socket-connector-BBS-2.c</h4><ul>
+<li>此程序为connector程序，相当于客户端程序，通过连接到BBS服务器而实现通信。此程序为异步的消息收发，即只显示了接收的消息，输入发送的消息则是通过与其通过命名管道相连的input进程实现。</li>
+<li>涉及到的系统调用主要是关于socket的函数<ul>
+<li>struct hostent * gethostbyname(const char * hostname)<ul>
+<li>功能:用域名或者主机名获取地址</li>
+<li>返回值：失败返回NULL指针，成功返回的非空指针指向如下的hostent结构<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct hostent &#123;</span><br><span class="line">   char  *h_name;            /* official name of host */</span><br><span class="line">   char **h_aliases;         /* alias list */</span><br><span class="line">   int    h_addrtype;        /* host address type */</span><br><span class="line">   int    h_length;          /* length of address */</span><br><span class="line">   char **h_addr_list;       /* list of addresses */</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">代码中用到了((struct in_addr *)host-&gt;h_addr,在matrix上提交编译不过，原因就是结构体实际上并没有h_addr这个成员，需要通过宏定义——#define h_addr h_addr_list[0]解决。</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>const char * inet_ntop(int family, const void *addrptr, char *strptr, size_t len)<ul>
+<li>功能：将数值格式转化为点分十进制的ip地址格式</li>
+<li>family：既可以是AF_INET（ipv4）也可以是AF_INET6（ipv6)</li>
+<li>从数值格式（addrptr）转换到表达式（strptr)</li>
+<li>len参数是目标存储单元的大小</li>
+<li>返回值：若成功则为指向结构的指针，若出错则为NULL</li>
+</ul>
+</li>
+<li>int socket(int af, int type, int protocol)<ul>
+<li>af 为地址族（Address Family），也就是 IP 地址类型，常用的有 AF_INET 和 AF_INET6</li>
+<li>type 为数据传输方式&#x2F;套接字类型，常用的有 SOCK_STREAM（流格式套接字&#x2F;面向连接的套接字） 和 SOCK_DGRAM（数据报套接字&#x2F;无连接的套接字）</li>
+<li>protocol 表示传输协议，常用的有 IPPROTO_TCP 和 IPPTOTO_UDP，分别表示 TCP 传输协议和 UDP 传输协议</li>
+<li>成功则返回套接字ID，失败返回-1</li>
+</ul>
+</li>
+<li>uint16_t htons(uint16_t hostshort)<ul>
+<li>将主机的无符号短整形数转换成网络字节顺序（将一个数的高低位互换)</li>
+<li>返回一个网络字节顺序的值</li>
+</ul>
+</li>
+<li>int connect(int sockfd, const struct sockaddr *servaddr, int *addrlen)<ul>
+<li>sockfd：socket函数返回的套接字描述符</li>
+<li>servaddr：指向套接字地址结构的指针</li>
+<li>addrlen：该套接字结构的大小</li>
+<li>返回：若成功则返回0，失败则返回-1</li>
+</ul>
+</li>
+<li>int getsockname(int sockfd, struct sockaddr *localaddr, socklen_t *addrlen)<ul>
+<li>通过套接字描述符来获取自己的IP地址</li>
+<li>成功，则返回0，如果调用出错，则返回-1</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>代码解释：</li>
+<li><img src="https://pic.gksec.com/2021/04/15/e117a1221f531/con1.png" alt="con1.png"></li>
+<li>首先是一些头文件的引用<ul>
+<li>&lt;netinet.h&gt;：包括了一些socket相关的结构体，如struct sockaddr_in，以及系统调用htons()</li>
+<li>&lt;netdb.h&gt;：定义了与网络有关的结构、变量类型、宏、函数，如struct hostent* gethostbyaddr(const void <em>addr, size_t len, int type)，struct hostent</em>gethostbyname(const char *name)</li>
+<li>&lt;arpa&#x2F;inet.h&gt;：定义了格式转换函数</li>
+<li>&lt;sys&#x2F;signal&gt;：定义了与信号相关的数据结构</li>
+</ul>
+</li>
+<li>接着是一些宏定义，BUFFER_SIZE为缓冲区大小，NICKNAME_L为昵称的最大长度，MSG_SIZE为消息大小，ERR_EXIT(m)为错误处理</li>
+<li><img src="https://pic.gksec.com/2021/04/15/e2f034d1451fb/con2.png" alt="con2.png"></li>
+<li>第二部分是读取传入main函数的文件名，如果通过调用access()函数，检测其不存在，则会调用mkfifo()函数，利用该文件名创建一个命名管道。</li>
+<li><img src="https://pic.gksec.com/2021/04/15/651a758236690/in3.png" alt="in3.png"></li>
+<li>第三部分是通过open()函数以可读可写的方式打开该命名管道，由于没有传入NONBLOCK参数，故为默认的阻塞状态。</li>
+<li>然后提示输入服务端的hostname或ipv4，读取之后清空输入缓冲区，然后再读取端口号，读取之后同样清空输入缓冲区</li>
+<li>然后通过调用gethostbyname()函数由输入的hostname或ipv4得到一个hostent型的结构体指针变量host，若得不到则报错，否则通过host输出其官方名字。</li>
+<li>然后遍历host指向的结构体中的h_addr_list，即服务端地址，通过inet_ntop()函数将其数值转换为表达式形式并输出。</li>
+<li>最后通过socket()函数创建一个ipv4的TCP传输类型的套接字，并将其id存放在connect_fd中</li>
+<li><img src="https://pic.gksec.com/2021/04/16/08142d809f2b1/in4.png" alt="in4.png"></li>
+<li>第四部分首先根据前面输入的服务器的ip和端口设置服务器端的sockaddr_in的相关消息。</li>
+<li>接着获取sockaddr的大小，然后调用connect()函数向服务器发起连接请求。</li>
+<li>然后调用getsockname()函数获取本地自身的IP地址和端口，然后通过ntohs()和inet_ntoa()函数分别将端口号和IP地址转换成正确形式后输出。</li>
+<li>最后复制本地的IP地址存放在ip_name_str中</li>
+<li><img src="https://pic.gksec.com/2021/04/16/cff2e10c8828f/in5.png" alt="in5.png"></li>
+<li>接下来开始通过fork()创建子进程，第五部分是父进程部分</li>
+<li>父进程是一个发送进程，首先通过read()函数读取命名管道中的消息。</li>
+<li>然后再通过send()函数以阻塞发送的方式发给以及建立socket连接的服务端并根据返回值判断是否发送成功，若发送失败则证明连接断开，此时便退出循环，准备结束进程。</li>
+<li>接着再对从命名管道读取的消息进行分析，若读取到以”#0”开头的消息，即为退出指令，则向服务器发送”I quit…”消息，然后退出循环，准备结束进程。</li>
+<li>最后，若退出了循环，则通过close()函数关闭命名管道以及socket，然后调用kill()函数，通过传入信号SIGKILL，结束子进程。</li>
+<li><img src="https://pic.gksec.com/2021/04/16/c498fb09a63c8/in6.png" alt="in6.png"></li>
+<li>最后一部分是子进程部分，负责接收服务端通过socket发送来的消息。</li>
+<li>首先通过recv()函数以阻塞接收的方式接收服务器端发送的消息并根据返回值判断是否接收成功，若接收失败则证明连接断开，此时便退出循环，准备结束进程。</li>
+<li>接着将接收的消息输出到屏幕，再判断是否是结束信号”Console: #0”，若是则跳出循环，准备结束进程</li>
+<li>最后，若退出了循环，则通过close()函数关闭socket，然后然后调用kill()函数，通过传入信号SIGKILL，结束父进程。</li>
+</ul>
+<h4 id="alg-11-5-socket-server-BBS-3-nickname-c"><a href="#alg-11-5-socket-server-BBS-3-nickname-c" class="headerlink" title="alg.11-5-socket-server-BBS-3-nickname.c"></a>alg.11-5-socket-server-BBS-3-nickname.c</h4><ul>
+<li>此代码的整体架构如下图</li>
+<li><img src="https://pic.gksec.com/2021/04/21/ab4e64e5bf92c/struc.png" alt="struc.png"><ul>
+<li>此代码通过利用许多的<strong>匿名管道</strong>实现多个进程之间的通信，每个连接的客户端会对应一个recv_send_data和pipe_data进程分别用于消息的收发和处理。</li>
+<li>main函数为父进程，主要负责监听并处理新客户端的连接请求。当有新用户连接时，父进程会对其进行初始化，并为其分配两个子进程——pipe_data()和recv_send_data()</li>
+<li>recv_send_data()对应的进程负责与客户端通过socket连接，从而实现消息的收发，当接收到客户端的消息，会通过fd_msg对应的管道发给pipe_data()进程处理。</li>
+<li>pipe_data()进程的输入除了fd_msg，还有来自input进程的消息，通过fdr对应的管道接收消息并进行处理。pipe_data()进程处理完消息之后会经对应的管道fd[sn]发送到对应的recv_send_data进程，然后再由其通过socket发送到对应的客户端。</li>
+<li>综上可看到pipe_data进程是核心的处理进程，每个连接的客户端对应的pipe_data进程会处理它们发送到服务器以及将要被收到的消息，而每个客户端对应的recv_send_data进程则是进行消息的收发。</li>
+</ul>
+</li>
+<li>涉及到的主要函数如下</li>
+<li>getifaddrs(int getifaddrs (struct ifaddrs **__ifap))<ul>
+<li>用于获取本地网络接口信息，将之存储于链表中，链表头结点指针存储于__ifap中带回</li>
+<li>函数执行成功返回0，失败返回-1</li>
+</ul>
+</li>
+<li>int setsockopt(int fd, int level, int optname, const char* optval, int optlen)<ul>
+<li>fd：套接字描述符</li>
+<li>level：指定选项代码的类型<ul>
+<li>SOL_SOCKET: 基本套接口</li>
+<li>IPPROTO_IP: IPv4套接口</li>
+<li>IPPROTO_IPV6: IPv6套接口</li>
+<li>IPPROTO_TCP: TCP套接口</li>
+</ul>
+</li>
+<li>optname：选项名称</li>
+<li>optval：是一个指向变量的指针 类型：整形，套接口结构， 其他结构类型:linger{}, timeval{ }</li>
+<li>optlen：optval的大小</li>
+</ul>
+</li>
+<li>int listen(int sockfd, int backlog)<ul>
+<li>功能为：把一个未连接的套接字转换成一个被动套接字，指示内核应该接受指向该套接字的链接请求</li>
+<li>sockfd：对应的套接字描述符</li>
+<li>指定了内核为此套接字排队的最大连接个数</li>
+<li>成功时返回0，错误时返回-1</li>
+</ul>
+</li>
+<li>int accept(int sockfd, void *addr, int *addrlen)<ul>
+<li>sockfd：对应的套接字描述符</li>
+<li>addr：一个指向sockaddr_in 的指针</li>
+<li>addrlen：结构体大小</li>
+<li>成功时返回0，错误时返回-1</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>代码解释：</li>
+<li><img src="https://pic.gksec.com/2021/04/16/2664801687354/nn1.png" alt="nn1.png"></li>
+<li>第一部分是头文件的引用以及一些相关宏定义</li>
+<li><img src="https://pic.gksec.com/2021/04/16/2dd31cc8063d6/nn2.png" alt="nn2.png"></li>
+<li>第二部分是一些变量定义，以及一个stat_descriptor()函数，用于将一些表示状态的整数对应到相应的状态。</li>
+<li><img src="https://pic.gksec.com/2021/04/16/03f0e555b48f9/nn3.png" alt="nn3.png"></li>
+<li>第三部分是自己定义了一个睡眠函数sleep_ms()，可以实现精确到毫秒的睡眠</li>
+<li><img src="https://pic.gksec.com/2021/04/16/d73229a20a721/nn4.png" alt="nn4.png"></li>
+<li>第四部分是定义了一个getipv4addr()函数用于获取ipv4的地址，首先通过getifaddr()函数获取本地的端口信息，然后找到IPv4地址，通过inet_ntop()函数转化后输出并返回该值。若为IPv6则将其输出，但不返回。</li>
+</ul>
+<hr>
+<ul>
+<li><img src="https://pic.gksec.com/2021/04/16/2a55695a98276/nn-pd1.png" alt="nn-pd1.png"></li>
+<li><img src="https://pic.gksec.com/2021/04/16/be22106ef2b47/nn-pd2.png" alt="nn-pd2.png"></li>
+<li><img src="https://pic.gksec.com/2021/04/17/3a9a7835e9991/nn-pd3.png" alt="nn-pd3.png"></li>
+<li><img src="https://pic.gksec.com/2021/04/17/9360b4c3858f5/nn-pd4.png" alt="nn-pd4.png"></li>
+<li><img src="https://pic.gksec.com/2021/04/17/f6b5a221c4082/nn-pd5.png" alt="nn-pd5.png"></li>
+<li><img src="https://pic.gksec.com/2021/04/17/1fcf67a040e83/nn-pd6.png" alt="nn-pd6.png"></li>
+<li><img src="https://pic.gksec.com/2021/04/17/7007623cf59c5/nn-pd7.png" alt="nn-pd7.png"></li>
+<li>pipe_data()函数用于服务器核心和连接端口之间的通信。</li>
+<li>首先通过fcntl函数fd[0],fd_stat,fd_msg对应的匿名管道设置为非阻塞接收，将fdr对应的命名管道也设置为非阻塞接收</li>
+<li>第一个while(1)是用于读取执行main函数的父进程最新的max_sn并将其输出</li>
+<li>第二个while(1)是用于通过读取fd_stat对应的匿名管道更新sn_stat</li>
+<li>第三个while(1)用于通过recv_send_data()函数更新sn_stat和nickname或者向所有连接的客户端广播消息<ul>
+<li>首先调用read()函数从fd_msg对应的匿名管道中读取消息，然后进行判断，若不为ACCEPT或NORMAL状态则直接退出，若为ACEEPT状态且消息没有”#”，则通过fd[sn]对应的匿名管道提示第sn个客户端需要先输入昵称。</li>
+<li>若输入的消息为”#0”，则将状态改为ENDED。</li>
+<li>若输入的消息为”#1”，则意味着要设置昵称，先对要设置的昵称判断是否有效，若无效则再通过fd[sn]对应的匿名管道反馈信息，若有效则对第sn个客户端重新命名昵称。</li>
+<li>当i &lt; max_sn，即昵称没有重复时，则修改其状态及昵称，然后通过遍历fd[sn]对应的匿名管道，向所有状态为NORMAL的客户端发出消息。</li>
+<li>当输入的消息为”#2”时，则将输出当前已连接的客户端的列表。</li>
+<li>当输入的消息为”@”开头，即进行私聊模式，此时将找到指定的客户端并通过其对应的匿名管道单独发送消息。</li>
+<li>else部分则是普通的消息，则会将其广播到所有连接的客户端。</li>
+</ul>
+</li>
+<li><img src="https://pic.gksec.com/2021/04/17/2db0b56803923/nn-pd8.png" alt="nn-pd8.png"></li>
+<li>第四个while(1)则是负责从input进程获取键盘输入并将其转发。</li>
+<li>首先是先调用read()函数从fdr对应管道中获取消息。</li>
+<li>若消息以”@”开头，若包含了”#0”，则会断开所@的客户端的连接。否则是服务器单独发给所@的客户端。</li>
+<li>而若消息以”#”开头，则会输出当前所有连接的客户端信息。</li>
+<li>否则则是普通的消息，则将会广播到所有连接的客户端。</li>
+</ul>
+<hr>
+<ul>
+<li><img src="https://pic.gksec.com/2021/04/17/b41d8f7fa38c1/nn-rs.png" alt="nn-rs.png"></li>
+<li>recv_send_data()函数用于实现客户端和BBS服务端之间的消息发送和接收。</li>
+<li>首先将connect_fd[sn]对应的socket和fd[sn]对应的匿名管道设置为非阻塞接收。</li>
+<li>然后进入一个接收发送的循环，首先是调用recv()函数从connect_fd[sn]对应的socket接收消息并将消息输出，同时将消息写入到fd_msg对应的匿名管道中，即将消息传给父进程。</li>
+<li>接着通过read()函数读取fd[sn]对应的匿名管道中的消息，将其输出到屏幕并通过send()函数发送到connect_fd[sn]对应的socket中，即将父进程的消息发送到第sn个客户端中。</li>
+</ul>
+<hr>
+<ul>
+<li><img src="https://pic.gksec.com/2021/04/16/80684ed2bad8f/nn-main1.png" alt="nn-main1.png"></li>
+<li>main函数中首先是先读取传入的参数作为文件名，然后调用mkfifo()函数创建一根命名管道并以可读可写的方式打开。</li>
+<li>然后再通过一个for循环创建MAX_CONN_NUM个管道</li>
+<li><img src="https://pic.gksec.com/2021/04/16/1207b3ae8cab4/nn-main2.png" alt="nn-main2.png"></li>
+<li>接着再通过fd_stat数组建立一根匿名管道用于从main函数获取第connect_sn个客户端的状态，以及通过fd_msg数组建立一根匿名管道用于从recv_send_data()函数中获取第connect_sn个客户端的消息</li>
+<li>然后先对每一个客户端的状态进行初始化为STAT_EMPTY，昵称初始化为Anonymous，再将其中第0个作为控制台，昵称初始化为Console</li>
+<li>然后通过socket()函数创建一个套接字，再通过调用getipv4addr()获取本地的IPv4地址并将其输出，然后再读入所选择的端口号，经过atoi()函数转化为端口号的格式存放在port_num中</li>
+<li><img src="https://pic.gksec.com/2021/04/16/24908e0b0bf41/nn-main3.png" alt="nn-main3.png"></li>
+<li>接着对sockaddr_in结构体进行初始化，然后调用setsockopt()函数通过参数SO_REUSEADDR设置允许重用本地地址和端口，（对于opt_val为1的原因暂不清楚)</li>
+<li>然后调用bind()函数绑定前面建立的套接字与本地的IP地址和端口，绑定成功之后便调用listen()函数开始监听来自客户端的连接请求</li>
+<li><img src="https://pic.gksec.com/2021/04/16/0925506b62490/nn-main4.png" alt="nn-main4.png"></li>
+<li>while(1)内的代码是对当有客户端发来连接请求时的处理</li>
+<li>接着调用fork()创建一个子进程用于调用pipe_data()函数，而父进程通过accept()函数对客户端的连接请求进行处理，接受连接请求完成连接之后便输出新连接上的客户端的序号sn，IP地址以及端口号。然后将其状态stat设置为STAT_ACCEPTED,并将其序号和状态写入到stdin_buf中。</li>
+<li>然后调用write()函数将stdin_buf中的信息通过fd_stat[1]对应的匿名管道传入到执行pipe_data()的子进程中</li>
+<li><img src="https://pic.gksec.com/2021/04/16/f00697e4af64d/nn-main5.png" alt="nn-main5.png"></li>
+<li>接着通过send()函数向新连接的客户端发送昵称初始化信息。</li>
+<li>然后通过fork()函数创建一个子进程用于调用recv_send_data()</li>
+<li>然后父进程调用write()函数将max_sn写入fd[0]对应的匿名管道中，然后连接的客户端数connect_sn加一，然后继续监听新的客户端连接请求</li>
+<li>最后若监听结束之后则通过close()函数关闭server_fd对应的socket，结束程序</li>
+</ul>
+<h3 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h3><p><img src="https://pic.gksec.com/2021/04/18/d80b0a734ed26/5.png" alt="5.png"><br>在服务器通过#查看当前共有三个用户<br><img src="https://pic.gksec.com/2021/04/18/7efc18642aece/6.png" alt="6.png"><br>Alice向大家发了一句话，此时大家均可以收到<br><img src="https://pic.gksec.com/2021/04/18/fac466a75a6c0/7.png" alt="7.png"><br>在服务器可以看到客户端的状态变化以及将要发送的消息<br><img src="https://pic.gksec.com/2021/04/18/fbb496ee9a3af/8.png" alt="8.png"><br>Alice通过@jane进行了私聊，此时Jane的聊天窗口出现了Alice的消息，而Bob没有<br><img src="https://pic.gksec.com/2021/04/18/8d124e73b0573/9.png" alt="9.png"><br>此时Alice通过#0退出了聊天<br><img src="https://pic.gksec.com/2021/04/18/98fe313d4ba80/10.png" alt="10.png"><br>服务端也给出了相应的消息</p>
+<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><h4 id="一"><a href="#一" class="headerlink" title="一"></a>一</h4><p>首先，发现了一个小BUG，就是在@其他人进行私聊的时候，自己的聊天窗口不会显示@其他人发送的消息，如下图所示<br><img src="https://pic.gksec.com/2021/04/17/eded34b6c18fe/bug1.1.png" alt="bug1.1.png"><br><img src="https://pic.gksec.com/2021/04/17/1bd55400fb12e/bug1.2.png" alt="bug1.2.png"><br>只需要在alg.11-5-socket-server-BBS-3-nickname.c中增添一段代码即可，如下图<br><img src="https://pic.gksec.com/2021/04/17/3215ba040189a/mo1.png" alt="mo1.png"><br>修改之后运行结果如下<br><img src="https://pic.gksec.com/2021/04/17/6b2140acbae53/mo1.1.png" alt="mo1.1.png"><br><img src="https://pic.gksec.com/2021/04/17/6da3c605e8db9/mo1.2.png" alt="mo1.2.png"><br><img src="https://pic.gksec.com/2021/04/17/e6647cc359eb2/mo1.3.png" alt="mo1.3.png"><br>可以看到当Alice私聊Bob的时候，Bob的聊天窗口出现Alice的消息的同时Alice自身的聊天窗口也出现了她刚刚发的消息，而Jane的聊天窗口理所应当的没有任何消息。</p>
+<h4 id="二"><a href="#二" class="headerlink" title="二"></a>二</h4><p>对功能的完善，一开始的代码无法同步聊天记录，比如当有两个人在聊天时，后面有第三个人进来以后无法看到之前的聊天记录。为此，将所有发到公屏上的消息同时写入一个log.txt文件中，后面再有人加入的时候便可把聊天记录复现。<br>修改如下<br><img src="https://pic.gksec.com/2021/04/18/518c1b36a4437/mo2.1.png" alt="mo2.1.png"><br>首先在函数开始的时候打开log.txt文件，通过参数O_TRUNC将原有信息清空<br><img src="https://pic.gksec.com/2021/04/18/6a42f768e5356/mo2n.png" alt="mo2n.png"><br>只将发往所有人的消息写入log文件<br><img src="https://pic.gksec.com/2021/04/18/4c00760f4e4e3/mo2.3.png" alt="mo2.3.png"><br>当有新客户端连接时，打开log文件，逐行读取消息并通过fd[sn]对应的管道发送给该客户端<br><img src="https://pic.gksec.com/2021/04/18/29d290339e748/mo2.4.png" alt="mo2.4.png"><br>最后关闭文件<br>验证结果如下：<br><img src="https://pic.gksec.com/2021/04/18/55b05ed37f5cc/res2.ser.1.png" alt="res2.ser.1.png"><br>当前只有两个用户Alice和Bob<br><img src="https://pic.gksec.com/2021/04/18/0609976cb765f/res2.2.png" alt="res2.2.png"><br>ALice和Bob各发了一条消息<br><img src="https://pic.gksec.com/2021/04/18/2312095f1f329/res2.4.png" alt="res2.4.png"><br>Jane准备加入聊天<br><img src="https://pic.gksec.com/2021/04/18/575868653084b/res2.5.png" alt="res2.5.png"><br>Jane加入后看到了先前发的消息<br><img src="https://pic.gksec.com/2021/04/18/8d35a50702811/res2.7.png" alt="res2.7.png"><br>此时Jane发送一条私聊消息给Alice<br><img src="https://pic.gksec.com/2021/04/18/001a5099c58ff/res2.8.png" alt="res2.8.png"><br>后面James进入聊天的时候并不会看到该私聊消息</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">HogarHuang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-BBS%E7%B3%BB%E7%BB%9F/">https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-BBS%E7%B3%BB%E7%BB%9F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post_share"><div class="social-share" data-image="/images/background.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://fastly.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E7%BA%BF%E7%A8%8B/"><img class="prev-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">OS-线程相关-1</div></div></a></div><div class="next-post pull-right"><a href="/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92/"><img class="next-cover" src="/images/background.jpg" onerror="onerror=null;src='/img/night.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">OS-消息传递</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E5%85%AB%E6%8A%A5%E5%91%8A"><span class="toc-number">1.</span> <span class="toc-text">实验八报告</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">代码分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E6%80%A7%E8%A7%A3%E9%87%8A"><span class="toc-number">1.1.1.</span> <span class="toc-text">原理性解释</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%86%E8%8A%82%E6%80%A7%E8%A7%A3%E9%87%8A"><span class="toc-number">1.1.2.</span> <span class="toc-text">细节性解释</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#alg-11-3-socket-input-2-c"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">alg.11-3-socket-input-2.c</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#alg-11-4-socket-connector-BBS-2-c"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">alg.11-4-socket-connector-BBS-2.c</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#alg-11-5-socket-server-BBS-3-nickname-c"><span class="toc-number">1.1.2.3.</span> <span class="toc-text">alg.11-5-socket-server-BBS-3-nickname.c</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="toc-number">1.1.3.</span> <span class="toc-text">运行结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9"><span class="toc-number">1.1.4.</span> <span class="toc-text">修改</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80"><span class="toc-number">1.1.4.1.</span> <span class="toc-text">一</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C"><span class="toc-number">1.1.4.2.</span> <span class="toc-text">二</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div></div></div></div></main><footer id="footer" style="background: #FFFFFF"><div id="footer-wrap"><div class="copyright">&copy;2022 By HogarHuang</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/chenxz21/hexo-theme-bcxm">Bcxm</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://fastly.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://fastly.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><script type="text/javascript" src="https://fastly.jsdelivr.net/npm/leancloud-storage@4.10.0/dist/av-min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://fastly.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
