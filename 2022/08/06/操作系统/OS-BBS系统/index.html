@@ -211,15 +211,17 @@
 </ul>
 <h4 id="alg-11-4-socket-connector-BBS-2-c"><a href="#alg-11-4-socket-connector-BBS-2-c" class="headerlink" title="alg.11-4-socket-connector-BBS-2.c"></a>alg.11-4-socket-connector-BBS-2.c</h4><ul>
 <li>此程序为connector程序，相当于客户端程序，通过连接到BBS服务器而实现通信。此程序为异步的消息收发，即只显示了接收的消息，输入发送的消息则是通过与其通过命名管道相连的input进程实现。</li>
-<li>涉及到的系统调用主要是关于socket的函数<ul>
-<li>struct hostent * gethostbyname(const char * hostname)<ul>
+<li><p>涉及到的系统调用主要是关于socket的函数</p>
+<ul>
+<li><p>struct hostent <em> gethostbyname(const char </em> hostname)</p>
+<ul>
 <li>功能:用域名或者主机名获取地址</li>
-<li>返回值：失败返回NULL指针，成功返回的非空指针指向如下的hostent结构<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct hostent &#123;</span><br><span class="line">   char  *h_name;            /* official name of host */</span><br><span class="line">   char **h_aliases;         /* alias list */</span><br><span class="line">   int    h_addrtype;        /* host address type */</span><br><span class="line">   int    h_length;          /* length of address */</span><br><span class="line">   char **h_addr_list;       /* list of addresses */</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<li><p>返回值：失败返回NULL指针，成功返回的非空指针指向如下的hostent结构</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct hostent &#123;</span><br><span class="line">   char  *h_name;            /* official name of host */</span><br><span class="line">   char **h_aliases;         /* alias list */</span><br><span class="line">   int    h_addrtype;        /* host address type */</span><br><span class="line">   int    h_length;          /* length of address */</span><br><span class="line">   char **h_addr_list;       /* list of addresses */</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">代码中用到了((struct in_addr *)host-&gt;h_addr,在matrix上提交编译不过，原因就是结构体实际上并没有h_addr这个成员，需要通过宏定义——#define h_addr h_addr_list[0]解决。</span><br></pre></td></tr></table></figure></li>
 </ul>
 </li>
-<li>const char * inet_ntop(int family, const void *addrptr, char *strptr, size_t len)<ul>
+<li>const char <em> inet_ntop(int family, const void </em>addrptr, char *strptr, size_t len)<ul>
 <li>功能：将数值格式转化为点分十进制的ip地址格式</li>
 <li>family：既可以是AF_INET（ipv4）也可以是AF_INET6（ipv6)</li>
 <li>从数值格式（addrptr）转换到表达式（strptr)</li>
@@ -229,7 +231,7 @@
 </li>
 <li>int socket(int af, int type, int protocol)<ul>
 <li>af 为地址族（Address Family），也就是 IP 地址类型，常用的有 AF_INET 和 AF_INET6</li>
-<li>type 为数据传输方式&#x2F;套接字类型，常用的有 SOCK_STREAM（流格式套接字&#x2F;面向连接的套接字） 和 SOCK_DGRAM（数据报套接字&#x2F;无连接的套接字）</li>
+<li>type 为数据传输方式/套接字类型，常用的有 SOCK_STREAM（流格式套接字/面向连接的套接字） 和 SOCK_DGRAM（数据报套接字/无连接的套接字）</li>
 <li>protocol 表示传输协议，常用的有 IPPROTO_TCP 和 IPPTOTO_UDP，分别表示 TCP 传输协议和 UDP 传输协议</li>
 <li>成功则返回套接字ID，失败返回-1</li>
 </ul>
@@ -239,14 +241,14 @@
 <li>返回一个网络字节顺序的值</li>
 </ul>
 </li>
-<li>int connect(int sockfd, const struct sockaddr *servaddr, int *addrlen)<ul>
+<li>int connect(int sockfd, const struct sockaddr <em>servaddr, int </em>addrlen)<ul>
 <li>sockfd：socket函数返回的套接字描述符</li>
 <li>servaddr：指向套接字地址结构的指针</li>
 <li>addrlen：该套接字结构的大小</li>
 <li>返回：若成功则返回0，失败则返回-1</li>
 </ul>
 </li>
-<li>int getsockname(int sockfd, struct sockaddr *localaddr, socklen_t *addrlen)<ul>
+<li>int getsockname(int sockfd, struct sockaddr <em>localaddr, socklen_t </em>addrlen)<ul>
 <li>通过套接字描述符来获取自己的IP地址</li>
 <li>成功，则返回0，如果调用出错，则返回-1</li>
 </ul>
@@ -259,10 +261,10 @@
 <li>代码解释：</li>
 <li><img src="https://pic.gksec.com/2021/04/15/e117a1221f531/con1.png" alt="con1.png"></li>
 <li>首先是一些头文件的引用<ul>
-<li>&lt;netinet.h&gt;：包括了一些socket相关的结构体，如struct sockaddr_in，以及系统调用htons()</li>
-<li>&lt;netdb.h&gt;：定义了与网络有关的结构、变量类型、宏、函数，如struct hostent* gethostbyaddr(const void <em>addr, size_t len, int type)，struct hostent</em>gethostbyname(const char *name)</li>
-<li>&lt;arpa&#x2F;inet.h&gt;：定义了格式转换函数</li>
-<li>&lt;sys&#x2F;signal&gt;：定义了与信号相关的数据结构</li>
+<li><netinet.h>：包括了一些socket相关的结构体，如struct sockaddr_in，以及系统调用htons()</netinet.h></li>
+<li><netdb.h>：定义了与网络有关的结构、变量类型、宏、函数，如struct hostent<em> gethostbyaddr(const void </em>addr, size_t len, int type)，struct hostent<em>gethostbyname(const char </em>name)</netdb.h></li>
+<li><arpa inet.h>：定义了格式转换函数</arpa></li>
+<li><sys signal>：定义了与信号相关的数据结构</sys></li>
 </ul>
 </li>
 <li>接着是一些宏定义，BUFFER_SIZE为缓冲区大小，NICKNAME_L为昵称的最大长度，MSG_SIZE为消息大小，ERR_EXIT(m)为错误处理</li>
@@ -328,7 +330,7 @@
 <li>成功时返回0，错误时返回-1</li>
 </ul>
 </li>
-<li>int accept(int sockfd, void *addr, int *addrlen)<ul>
+<li>int accept(int sockfd, void <em>addr, int </em>addrlen)<ul>
 <li>sockfd：对应的套接字描述符</li>
 <li>addr：一个指向sockaddr_in 的指针</li>
 <li>addrlen：结构体大小</li>

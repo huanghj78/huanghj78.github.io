@@ -1,9 +1,9 @@
-<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>OS-同步互斥相关-1</title><meta name="author" content="HogarHuang"><meta name="copyright" content="HogarHuang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="LabWeek15 实验报告内容一alg.18-1-syn-fetch-1,2,3.c原理性解释 这几份代码是验证gcc的__sync_原子操作家族中的__sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。 type __sync_fetch_and_add (type *ptr, type value)：取ptr指向的变量的值，加上va">
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>OS-同步互斥相关-1</title><meta name="author" content="HogarHuang"><meta name="copyright" content="HogarHuang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="LabWeek15 实验报告内容一alg.18-1-syn-fetch-1,2,3.c原理性解释 这几份代码是验证gcc的sync_原子操作家族中的sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。 type __sync_fetch_and_add (type *ptr, type value)：取ptr指向的变量的值，加上value之">
 <meta property="og:type" content="article">
 <meta property="og:title" content="OS-同步互斥相关-1">
 <meta property="og:url" content="https://huanghj78.github.io/2022/08/06/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/OS-%E5%90%8C%E6%AD%A5%E4%BA%92%E6%96%A5/index.html">
 <meta property="og:site_name" content="Hogar&#39;s Blog">
-<meta property="og:description" content="LabWeek15 实验报告内容一alg.18-1-syn-fetch-1,2,3.c原理性解释 这几份代码是验证gcc的__sync_原子操作家族中的__sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。 type __sync_fetch_and_add (type *ptr, type value)：取ptr指向的变量的值，加上va">
+<meta property="og:description" content="LabWeek15 实验报告内容一alg.18-1-syn-fetch-1,2,3.c原理性解释 这几份代码是验证gcc的sync_原子操作家族中的sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。 type __sync_fetch_and_add (type *ptr, type value)：取ptr指向的变量的值，加上value之">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://huanghj78.github.io/images/background.jpg">
 <meta property="article:published_time" content="2022-08-06T15:14:42.942Z">
@@ -137,13 +137,13 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
 <!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="is-center"><div class="avatar-img"><img src="/img/luka.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">HogarHuang</div><div class="author-info__description">1353188493@qq.com</div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hogar's Blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-clock"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/records"><i class="fa-fw fas fa-comment-dots"></i><span> 随记</span></a></div><div class="menus_item"><a class="site-page" href="/gedan"><i class="fa-fw fas fa-music"></i><span> 歌单</span></a></div><div class="menus_item"><a class="site-page" href="/game"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk"><i class="fa-fw fa fa-heartbeat"></i><span> 时光</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-tools"></i><span> 工具</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/google"><span> 镜像</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://json.xbyzs.cf"><span> Json格式化</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://draw.xbyzs.cf"><span> Draw画布</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://enkey.xbyzs.cf"><span> EnKey</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">OS-同步互斥相关-1</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">Created</span><time datetime="2022-08-06T15:14:42.942Z" title="Created 2022-08-06 23:14:42">2022-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="meta-secondline"></div></div></div><article class="post-content" id="article-container"><h1 id="LabWeek15-实验报告"><a href="#LabWeek15-实验报告" class="headerlink" title="LabWeek15 实验报告"></a>LabWeek15 实验报告</h1><h2 id="内容一"><a href="#内容一" class="headerlink" title="内容一"></a>内容一</h2><h3 id="alg-18-1-syn-fetch-1-2-3-c"><a href="#alg-18-1-syn-fetch-1-2-3-c" class="headerlink" title="alg.18-1-syn-fetch-1,2,3.c"></a>alg.18-1-syn-fetch-1,2,3.c</h3><h4 id="原理性解释"><a href="#原理性解释" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
-<li>这几份代码是验证gcc的__sync_原子操作家族中的__sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。</li>
+<li>这几份代码是验证gcc的<strong>sync_原子操作家族中的</strong>sync_fetch_and_aad()和__sync_add_and_fetch()函数实现同步互斥的功能。</li>
 <li>type __sync_fetch_and_add (type *ptr, type value)：取ptr指向的变量的值，加上value之后再赋值给ptr指向的变量，整个过程是一个原子操作。</li>
 <li>type __sync_add_and_fetch (type *ptr, type value)：将ptr指向的变量加上value之后再去ptr指向的变量的值，同样的，整个过程是原子操作。</li>
 <li>这两个函数类似于前自增和后自增，前者对应后自增，后者对应前自增。</li>
 </ul>
 <h4 id="细节性解释"><a href="#细节性解释" class="headerlink" title="细节性解释"></a>细节性解释</h4><h5 id="alg-18-1-syn-fetch-1-c"><a href="#alg-18-1-syn-fetch-1-c" class="headerlink" title="alg.18-1-syn-fetch-1.c"></a>alg.18-1-syn-fetch-1.c</h5><ul>
-<li>通过分别对<code>i = 10;</code>执行<code>__sync_fetch_and_add(&amp;i, 20)</code>和<code> __sync_add_and_fetch(&amp;i, 20)</code>，输出函数返回值，同一语句中i的值和下一条语句i的值，探究并比较两个函数的作用及区别。</li>
+<li>通过分别对<code>i = 10;</code>执行<code>__sync_fetch_and_add(&amp;i, 20)</code>和<code>__sync_add_and_fetch(&amp;i, 20)</code>，输出函数返回值，同一语句中i的值和下一条语句i的值，探究并比较两个函数的作用及区别。</li>
 <li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/27/98ccb4f595884/1.png" alt="1.png"><br>可以看到，两个函数的返回值不相同，一个返回的是i初始的值，另一个返回的是i增加之后的值，这一点与自增类似，如下<br><img src="https://pic.gksec.com/2021/05/28/8bc25bb3cf2d1/4.png" alt="4.png"><br>不同的是，当使用上述两个函数的时候，在同一个printf语句中，i的值不变，仍为10。<br>到了第二个printf语句，输出的i自然是加上20之后的值——30</li>
 </ul>
 <h5 id="alg-18-1-syn-fetch-2-c"><a href="#alg-18-1-syn-fetch-2-c" class="headerlink" title="alg.18-1-syn-fetch-2.c"></a>alg.18-1-syn-fetch-2.c</h5><ul>
@@ -156,10 +156,10 @@
 </ul>
 <h3 id="alg-18-2-syn-compare-test-c"><a href="#alg-18-2-syn-compare-test-c" class="headerlink" title="alg.18-2-syn-compare-test.c"></a>alg.18-2-syn-compare-test.c</h3><h4 id="原理性解释-1"><a href="#原理性解释-1" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
 <li>此程序是对以下四个函数功能的验证。</li>
-<li>bool __sync_bool_compare_and_swap (type* ptr, type oldval, type newval):比较* ptr与oldval的值，如果两者相等，则将newval更新到*ptr并返回true，否则返回false</li>
-<li>type __sync_val_compare_and_swap (type* ptr, type oldval type newval, …)：比较* ptr与oldval的值，如果两者相等，则将newval更新到<em>ptr并返回操作*<em>之前</em></em> <em>ptr的值，否则单纯返回操作*<em>之前</em></em> *ptr</li>
-<li>type __sync_lock_test_and_set (type * ptr, type value)： 将value写入* ptr，对* ptr加锁，并返回操作之前*ptr的值</li>
-<li>void __sync_lock_release (type* ptr, …)：将0写入到* ptr，并对*ptr解锁</li>
+<li>bool __sync_bool_compare_and_swap (type<em> ptr, type oldval, type newval):比较</em> ptr与oldval的值，如果两者相等，则将newval更新到*ptr并返回true，否则返回false</li>
+<li>type __sync_val_compare_and_swap (type<em> ptr, type oldval type newval, …)：比较</em> ptr与oldval的值，如果两者相等，则将newval更新到<em>ptr并返回操作<strong>之前</strong> </em>ptr的值，否则单纯返回操作<strong>之前</strong> *ptr</li>
+<li>type __sync_lock_test_and_set (type <em> ptr, type value)： 将value写入</em> ptr，对<em> ptr加锁，并返回操作之前</em>ptr的值</li>
+<li>void __sync_lock_release (type<em> ptr, …)：将0写入到</em> ptr，并对*ptr解锁</li>
 </ul>
 <h4 id="细节性解释-1"><a href="#细节性解释-1" class="headerlink" title="细节性解释"></a>细节性解释</h4><ul>
 <li>执行结果如下：<br><img src="https://pic.gksec.com/2021/05/28/3981b6e5367df/5.png" alt="5.png"></li>
@@ -172,7 +172,7 @@
 </ul>
 <h3 id="alg-18-3-syn-pthread-mutex-c"><a href="#alg-18-3-syn-pthread-mutex-c" class="headerlink" title="alg.18-3-syn-pthread-mutex.c"></a>alg.18-3-syn-pthread-mutex.c</h3><h4 id="原理性解释-2"><a href="#原理性解释-2" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
 <li>此程序是利用POSIX的互斥锁实现同步互斥，用到的主要函数如下：</li>
-<li>int pthread_mutex_init(pthread_mutex_t *restrict mutex,const pthread_mutexattr_t *restrict attr)：对互斥锁变量进行初始化，参数attr指定了初始化属性，若为NULL，则使用默认属性，此时等价于<code>pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;</code>。函数成功完成之后会返回零，其他任何返回值都表示出现了错误。</li>
+<li>int pthread_mutex_init(pthread_mutex_t <em>restrict mutex,const pthread_mutexattr_t </em>restrict attr)：对互斥锁变量进行初始化，参数attr指定了初始化属性，若为NULL，则使用默认属性，此时等价于<code>pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;</code>。函数成功完成之后会返回零，其他任何返回值都表示出现了错误。</li>
 <li>int pthread_mutex_lock(pthread_mutex_t *mutex)：对互斥锁加锁。</li>
 <li>int pthread_mutex_unlock(pthread_mutex_t *mutex)：对互斥锁解锁，由于一个线程上锁之后，只有解锁了才能够继续上锁，因此互斥锁上锁之后到解锁之前的区域至多只能有一个线程可以访问，由此实现了互斥。</li>
 <li>int pthread_mutex_trylock(pthread_mutex_t *mutex)：销毁互斥锁</li>
@@ -186,7 +186,7 @@
 <h3 id="alg-18-4-syn-pthread-sem-unnamed-c"><a href="#alg-18-4-syn-pthread-sem-unnamed-c" class="headerlink" title="alg.18-4-syn-pthread-sem-unnamed.c"></a>alg.18-4-syn-pthread-sem-unnamed.c</h3><h4 id="原理性解释-3"><a href="#原理性解释-3" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
 <li>此程序使用了POSIX的无名信号量来实现同步互斥，主要用的函数如下</li>
 <li>int sem_init(sem_t *sem, int pshared, unsigned int value)：初始化由 sem 指向的信号对象，并给它一个初始的整数值 value。pshared 控制信号量的类型，值为 0 代表该信号量用于多线程间的同步，值如果大于 0 表示可以共享，用于多个相关进程间的同步。</li>
-<li>int sem_wait(sem_t *sem)：是一个阻塞的函数，测试所指定信号量的值，它的操作是原子的。若 sem value &gt; 0，则该信号量值减去 1 并立即返回。若sem value &#x3D; 0，则阻塞直到 sem value &gt; 0，此时立即减去 1，然后返回。</li>
+<li>int sem_wait(sem_t *sem)：是一个阻塞的函数，测试所指定信号量的值，它的操作是原子的。若 sem value &gt; 0，则该信号量值减去 1 并立即返回。若sem value = 0，则阻塞直到 sem value &gt; 0，此时立即减去 1，然后返回。</li>
 <li>int sem_post(sem_t *sem)：指定的信号量 sem 的值加 1，唤醒正在等待该信号量的任意线程</li>
 <li>int sem_destroy(sem_t *sem)：用于对用完的信号量的清理。</li>
 <li>在sem_wait和sem_post之间的即为临界区域。</li>
@@ -202,7 +202,7 @@
 <h3 id="alg-18-5-syn-pthread-sem-named-c"><a href="#alg-18-5-syn-pthread-sem-named-c" class="headerlink" title="alg.18-5-syn-pthread-sem-named.c"></a>alg.18-5-syn-pthread-sem-named.c</h3><h4 id="原理性解释-4"><a href="#原理性解释-4" class="headerlink" title="原理性解释"></a>原理性解释</h4><ul>
 <li>此程序使用了POSIX的命名信号量来实现同步互斥，命名信号量即信号量有一个名称，不同进程可以通过该名字得到对应的信号量并进行操作。因此无名信号量和命名信号量的主要区别在于前者用于线程间的同步互斥而后者用于进程间的同步互斥。无名信号量直接保存在内存中，而命名信号量要求创建一个文件。</li>
 <li>主要用的函数如下：</li>
-<li>sem_t *sem_open(const char *name, int oflag)或 sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value)，前者用于信号量存在时，打开该信号量。后者用于信号量不存在时，创建一个信号量。<ul>
+<li>sem_t <em>sem_open(const char </em>name, int oflag)或 sem_t <em>sem_open(const char </em>name, int oflag, mode_t mode, unsigned int value)，前者用于信号量存在时，打开该信号量。后者用于信号量不存在时，创建一个信号量。<ul>
 <li>name表示信号量文件名；</li>
 <li>flags表示sem_open() 函数的行为标志；</li>
 <li>mode表示文件权限；</li>
@@ -243,15 +243,15 @@
 </ul>
 <h5 id="alg-18-7-syn-pc-producer-6-c"><a href="#alg-18-7-syn-pc-producer-6-c" class="headerlink" title="alg.18-7-syn-pc-producer-6.c"></a>alg.18-7-syn-pc-producer-6.c</h5><ul>
 <li>此程序为生产者程序，主函数实现的是根据传入的参数得到共享内存的ID，从而通过shmat()能够访问共享内存。接着通过pthread_create()生成生产者线程。最后等到生产者线程均结束之后，调用了THREAD_CONS - 1次的sem_post(&amp;ctln-&gt;stock)<code>防止出现当循环队列中没有产品且生产产品数以达到要求时，生产者线程不再进入共享内存而导致一些消费者线程卡在了 sem_wait(&amp;ctln-&gt;stock); 无法正常结束的情况 。</code>。最后断开与共享内存的连接。</li>
-<li>生产者线程函数实现的是往共享内存中的循环队列加入一个新的元素，即生产一个产品。当目前生产的产品数未达到所需时，便尝试进入共享内存，由于生产的前提是需要循环队列中有空位，因此需要先调用<code> sem_wait(&amp;ctln-&gt;emptyslot);</code>,同时，为了实现互斥进入共享内存，则需要用到<code> sem_wait(&amp;ctln-&gt;sem_mutex);</code>。</li>
+<li>生产者线程函数实现的是往共享内存中的循环队列加入一个新的元素，即生产一个产品。当目前生产的产品数未达到所需时，便尝试进入共享内存，由于生产的前提是需要循环队列中有空位，因此需要先调用<code>sem_wait(&amp;ctln-&gt;emptyslot);</code>,同时，为了实现互斥进入共享内存，则需要用到<code>sem_wait(&amp;ctln-&gt;sem_mutex);</code>。</li>
 <li>当成功进入之后，则再判断目前生产的产品数是否达到所需，若达到了则调用<code>sem_post(&amp;ctln-&gt;emptyslot);</code>释放空位。若没有，则将item_num++表示生产了一个产品，然后移动循环队列的尾指针<code>ctln-&gt;enqueue = (ctln-&gt;enqueue + 1) % ctln-&gt;BUFFER_SIZE;</code>，然后通过偏移量访问产品数据，写入产品的编号以及所被生产的线程号。</li>
 <li>若此时已经达到所需生产数目，则将END_FLAG置为1表示可以结束生产。</li>
-<li>最后调用<code>sem_post(&amp;ctln-&gt;stock);</code>表示循环队列中多了一个产品，再调用<code> sem_post(&amp;ctln-&gt;sem_mutex);</code>以便其他线程可以进入共享内存。</li>
+<li>最后调用<code>sem_post(&amp;ctln-&gt;stock);</code>表示循环队列中多了一个产品，再调用<code>sem_post(&amp;ctln-&gt;sem_mutex);</code>以便其他线程可以进入共享内存。</li>
 </ul>
 <h5 id="alg-18-8-syn-pc-consumer-6-c"><a href="#alg-18-8-syn-pc-consumer-6-c" class="headerlink" title="alg.18-8-syn-pc-consumer-6.c"></a>alg.18-8-syn-pc-consumer-6.c</h5><ul>
 <li>此程序为消费者程序，主函数实现的是根据传入的参数得到共享内存的ID，从而通过shmat()能够访问共享内存。接着通过pthread_create()生成消费者线程。最后等到消费者线程均结束之后，断开与共享内存的连接。</li>
 <li>消费者线程函数实现的是取出共享内存中的循环队列中的一个产品。</li>
-<li>当目前已消费的产品数目小于总数目或END_FLAG未被置1时，尝试进入共享内存。首先需要先确保循环队列中有产品，故需要调用<code>sem_wait(&amp;ctln-&gt;stock); </code>然后为了互斥地进入共享内存，再调用<code>sem_wait(&amp;ctln-&gt;sem_mutex);</code>。</li>
+<li>当目前已消费的产品数目小于总数目或END_FLAG未被置1时，尝试进入共享内存。首先需要先确保循环队列中有产品，故需要调用<code>sem_wait(&amp;ctln-&gt;stock);</code>然后为了互斥地进入共享内存，再调用<code>sem_wait(&amp;ctln-&gt;sem_mutex);</code>。</li>
 <li>进入共享内存之后，再次判断目前已消费的产品数目是否小于总数目，若不是则调用<code>sem_post(&amp;ctln-&gt;stock);</code>，否则移动队首指针表示出队，然后输出该产品的编号以及生产它的线程号，然后调用<code>sem_post(&amp;ctln-&gt;emptyslot);</code>表明多了一个空位以便生产者线程可以进入。</li>
 <li>最后调用<code>sem_post(&amp;ctln-&gt;sem_mutex);</code>以便其他线程可以进入共享内存。</li>
 </ul>
@@ -269,8 +269,8 @@
 <li>与互斥锁不同，条件变量是用来等待而不是用来上锁的。条件变量用来自动阻塞一个线程，直到某特殊情况发生为止。条件变量使我们可以睡眠等待某种条件出现。</li>
 <li>条件变量是利用线程间共享的全局变量进行同步的一种机制，<br>主要包括两个动作：<br>一个线程等待”条件变量的条件成立”而挂起；另一个线程使”条件成立”（给出条件成立信号）。</li>
 <li>条件变量的类型为pthread_cond_t，需要与互斥锁搭配使用，相关的函数如下：<ul>
-<li>int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *cond_attr)：使用 cond_attr 指定的属性初始化条件变量 cond，当 cond_attr 为 NULL 时，使用缺省的属性</li>
-<li>int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)：阻塞该线程直到条件成立</li>
+<li>int pthread_cond_init(pthread_cond_t <em>cond, pthread_condattr_t </em>cond_attr)：使用 cond_attr 指定的属性初始化条件变量 cond，当 cond_attr 为 NULL 时，使用缺省的属性</li>
+<li>int pthread_cond_wait(pthread_cond_t <em>cond, pthread_mutex_t </em>mutex)：阻塞该线程直到条件成立</li>
 <li>int pthread_cond_signal(pthread_cond_t *cond)：发出条件成立信号，唤醒阻塞的线程</li>
 <li>int pthread_cond_destroy(pthread_cond_t *cond)：销毁一个条件变量，释放它拥有的资源。进入 pthread_cond_destroy 之前，必须没有在该条件变量上等待的线程。否则返回EBUSY</li>
 </ul>
@@ -278,7 +278,7 @@
 </ul>
 <h4 id="细节性解释-6"><a href="#细节性解释-6" class="headerlink" title="细节性解释"></a>细节性解释</h4><ul>
 <li>首先定义并初始化互斥锁mutex和条件变量cond，主函数实现的是创建两个线程，分别递增和递减全局变量count</li>
-<li>线程函数decrement()实现的是对count进行递减操作，通过一个条件变量，当count小于等于0时，会通过<code> pthread_cond_wait(&amp;cond, &amp;mutex)</code>堵塞直到count大于0，才会继续执行递减操作。</li>
+<li>线程函数decrement()实现的是对count进行递减操作，通过一个条件变量，当count小于等于0时，会通过<code>pthread_cond_wait(&amp;cond, &amp;mutex)</code>堵塞直到count大于0，才会继续执行递减操作。</li>
 <li>线程函数increment()实现的是对count进行递增操作，当count大于0的时候会通过<code>pthread_cond_signal(&amp;cond)</code>唤醒阻塞的递减线程。</li>
 <li>运行结果如下：<br><img src="https://pic.gksec.com/2021/05/29/a203a60459e07/14.png" alt="14.png"></li>
 <li>可以看到通过条件变量的控制，保证了count始终大于0</li>
@@ -291,24 +291,15 @@
 <li>thread_mutex：其值为0或1，用于实现线程队列的互斥</li>
 </ul>
 </li>
-<li><p>empty_slots所用在的地方如下所示：</p>
-</li>
-<li><p>每次添加任务到任务队列之前，先调用<code>sem_wait(&amp;(pool-&gt;empty_slots));</code>，当任务队列没有空位的时候便会阻塞于此。<br><img src="https://pic.gksec.com/2021/05/29/3c5a7ed5a6352/%E9%80%89%E5%8C%BA_021.png" alt="选区_021.png"></p>
-</li>
-<li><p>每次任务结束的时候，会调用<code>sem_post(&amp;(pool-&gt;empty_slots));</code>表示任务队列有新的空位。<br><img src="https://pic.gksec.com/2021/05/29/ac95699f9feaa/%E9%80%89%E5%8C%BA_022.png" alt="选区_022.png"><br>由此实现任务进队出队的同步。</p>
-</li>
-<li><p>count_mutex所用在的地方如下所示：<br><img src="https://pic.gksec.com/2021/05/29/4929c3afc6b19/%E9%80%89%E5%8C%BA_023.png" alt="选区_023.png"></p>
-</li>
-<li><p>实际上类似于一个互斥锁的功能，将count的自增操作实现互斥，避免条件竞争，保证结果的正确性。</p>
-</li>
-<li><p>thread_mutex所用在的地方如下所示：</p>
-</li>
-<li><p>为了避免多个线程枪同一个任务的情况，需要对工作线程获取任务的过程进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/568b25a0778fd/%E9%80%89%E5%8C%BA_024.png" alt="选区_024.png"></p>
-</li>
-<li><p>为保证工作线程下标的正确以及队列的正确，入队需要进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/080cc33bae2c4/%E9%80%89%E5%8C%BA_025.png" alt="选区_025.png"></p>
-</li>
-<li><p>同样的道理，出队也需要进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/3f78eeddfaed7/%E9%80%89%E5%8C%BA_026.png" alt="选区_026.png"></p>
-</li>
+<li>empty_slots所用在的地方如下所示：</li>
+<li>每次添加任务到任务队列之前，先调用<code>sem_wait(&amp;(pool-&gt;empty_slots));</code>，当任务队列没有空位的时候便会阻塞于此。<br><img src="https://pic.gksec.com/2021/05/29/3c5a7ed5a6352/选区_021.png" alt="选区_021.png"></li>
+<li>每次任务结束的时候，会调用<code>sem_post(&amp;(pool-&gt;empty_slots));</code>表示任务队列有新的空位。<br><img src="https://pic.gksec.com/2021/05/29/ac95699f9feaa/选区_022.png" alt="选区_022.png"><br>由此实现任务进队出队的同步。</li>
+<li>count_mutex所用在的地方如下所示：<br><img src="https://pic.gksec.com/2021/05/29/4929c3afc6b19/选区_023.png" alt="选区_023.png"></li>
+<li>实际上类似于一个互斥锁的功能，将count的自增操作实现互斥，避免条件竞争，保证结果的正确性。</li>
+<li>thread_mutex所用在的地方如下所示：</li>
+<li>为了避免多个线程枪同一个任务的情况，需要对工作线程获取任务的过程进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/568b25a0778fd/选区_024.png" alt="选区_024.png"></li>
+<li>为保证工作线程下标的正确以及队列的正确，入队需要进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/080cc33bae2c4/选区_025.png" alt="选区_025.png"></li>
+<li>同样的道理，出队也需要进行互斥。<br><img src="https://pic.gksec.com/2021/05/29/3f78eeddfaed7/选区_026.png" alt="选区_026.png"></li>
 </ul>
 <h3 id="结果分析："><a href="#结果分析：" class="headerlink" title="结果分析："></a>结果分析：</h3><p><img src="https://pic.gksec.com/2021/05/14/928d9dd6f6005/2.png" alt="2.png"></p>
 <ul>
